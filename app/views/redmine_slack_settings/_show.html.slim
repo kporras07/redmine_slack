@@ -16,9 +16,7 @@
           |  (
           = l(:label_redmine_slack_default_not_visible)
           | )
-      = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :redmine_slack_icon, size: 60 }
       = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :redmine_slack_channel, size: 30 }
-      = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :redmine_slack_username, size: 30 }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :redmine_slack_verify_ssl }
 
       br
@@ -26,7 +24,6 @@
       .info = t(:redmine_slack_issue_intro)
       br
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :auto_mentions }
-      = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :default_mentions, size: 30 }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :display_watchers }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_updates }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :new_include_description }
@@ -42,31 +39,5 @@
       br
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_wiki }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_wiki_updates }
-
-      - if RedmineSlack::REDMINE_DB_SUPPORT && User.current.allowed_to?(:view_db_entries, @project)
-        br
-        h3 = l(:label_db_entry_plural)
-        .info = t(:redmine_slack_db_intro)
-        br
-        = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_db }
-        = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_db_updates }
-        = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_private_db }
-
-      - if RedmineSlack::REDMINE_CONTACTS_SUPPORT && User.current.allowed_to?(:view_contacts, @project)
-        br
-        h3 = l(:label_contact_plural)
-        .info = t(:redmine_slack_contacts_intro)
-        br
-        = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_contact }
-        = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_contact_updates }
-        = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_private_contacts }
-
-      - if Redmine::Plugin.installed?('redmine_passwords') && User.current.allowed_to?(:view_passwords, @project)
-        br
-        h3 = l(:label_settings_post_password)
-        .info = t(:redmine_slack_passwords_intro)
-        br
-        = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_password }
-        = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_password_updates }
 
     = submit_tag l(:button_save)

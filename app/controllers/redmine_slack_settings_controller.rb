@@ -32,6 +32,6 @@ class RedmineSlackSettingsController < ApplicationController
                                     :post_private_issues,
                                     :post_private_notes,
                                     :post_wiki,
-                                    :post_wiki_updates,
+                                    :post_wiki_updates
   end
 end

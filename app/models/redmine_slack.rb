@@ -26,7 +26,7 @@ class RedmineSlack
   end
 
   def self.speak(msg, channels, url, options)
-    url ||= RedmineSlack.settings[:messenger_url]
+    url ||= RedmineSlack.settings[:redmine_slack_url]
 
     return if url.blank?
     return if channels.blank?
@@ -36,11 +36,11 @@ class RedmineSlack
       link_names: 1
     }
 
-    username = RedmineSlack.textfield_for_project(options[:project], :messenger_username)
+    username = RedmineSlack.textfield_for_project(options[:project], :redmine_slack_username)
     params[:username] = username if username.present?
     params[:attachments] = [options[:attachment]] if options[:attachment]&.any?
 
-    icon = RedmineSlack.textfield_for_project(options[:project], :messenger_icon)
+    icon = RedmineSlack.textfield_for_project(options[:project], :redmine_slack_icon)
     if icon.present?
       if icon.start_with? ':'
         params[:icon_emoji] = icon
@@ -53,7 +53,7 @@ class RedmineSlack
       uri = URI(url)
       params[:channel] = channel
       http_options = { use_ssl: uri.scheme == 'https' }
-      http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:messenger_verify_ssl)
+      http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:redmine_slack_verify_ssl)
 
       begin
         req = Net::HTTP::Post.new(uri)
@@ -85,13 +85,13 @@ class RedmineSlack
 
     # project based
     pm = RedmineSlackSetting.find_by(project_id: proj.id)
-    return pm.messenger_url if !pm.nil? && pm.messenger_url.present?
+    return pm.redmine_slack_url if !pm.nil? && pm.redmine_slack_url.present?
 
     # parent project based
     parent_url = url_for_project(proj.parent)
     return parent_url if parent_url.present?
     # system based
-    return RedmineSlack.settings[:messenger_url] if RedmineSlack.settings[:messenger_url].present?
+    return RedmineSlack.settings[:redmine_slack_url] if RedmineSlack.settings[:redmine_slack_url].present?
 
     nil
   end
@@ -120,10 +120,10 @@ class RedmineSlack
 
     # project based
     pm = RedmineSlackSetting.find_by(project_id: proj.id)
-    if !pm.nil? && pm.messenger_channel.present?
-      return [] if pm.messenger_channel == '-'
+    if !pm.nil? && pm.redmine_slack_channel.present?
+      return [] if pm.redmine_slack_channel == '-'
 
-      return pm.messenger_channel.split(',').map!(&:strip).uniq
+      return pm.redmine_slack_channel.split(',').map!(&:strip).uniq
     end
     default_project_channels(proj)
   end
@@ -133,9 +133,9 @@ class RedmineSlack
     parent_channel = channels_for_project(proj.parent)
     return parent_channel if parent_channel.present?
     # system based
-    if RedmineSlack.settings[:messenger_channel].present? &&
-       RedmineSlack.settings[:messenger_channel] != '-'
-      return RedmineSlack.settings[:messenger_channel].split(',').map!(&:strip).uniq
+    if RedmineSlack.settings[:redmine_slack_channel].present? &&
+       RedmineSlack.settings[:redmine_slack_channel] != '-'
+      return RedmineSlack.settings[:redmine_slack_channel].split(',').map!(&:strip).uniq
     end
 
     []
