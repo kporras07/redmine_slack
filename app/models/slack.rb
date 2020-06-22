@@ -1,4 +1,5 @@
 require 'net/http'
+require 'json'
 
 class Slack
   include Redmine::I18n
@@ -20,15 +21,16 @@ class Slack
   end
 
   def self.speak(msg, channels, options)
-    #TODO: HERE!!!!
     url = "https://slack.com/api/chat.postMessage"
+    token = RedmineSlack.settings[:redmine_slack_token]
 
     return if url.blank?
     return if channels.blank?
+    return if token.blank?
 
     params = {
       text: msg,
-      link_names: 1
+      link_names: 1,
     }
 
     params[:attachments] = [options[:attachment]] if options[:attachment]&.any?
@@ -40,8 +42,9 @@ class Slack
       http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:redmine_slack_verify_ssl)
 
       begin
-        req = Net::HTTP::Post.new(uri)
-        req.set_form_data(payload: params.to_json)
+        req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json')
+        req['Authorization'] = "Bearer #{token}"
+        req.body = params.to_json
         Net::HTTP.start(uri.hostname, uri.port, http_options) do |http|
           response = http.request(req)
           Rails.logger.warn(response) unless [Net::HTTPSuccess, Net::HTTPRedirection, Net::HTTPOK].include? response
@@ -220,13 +223,13 @@ class Slack
     names = []
     Slack.textfield_for_project(project, :default_mentions)
              .split(',').each { |m| names.push m.strip }
-    names += extract_usernames(text) unless text.nil?
+    names += self.extract_usernames(text) unless text.nil?
     names.present? ? ' To: ' + names.uniq.join(', ') : nil
   end
 
   def self.extract_usernames(text)
     text = '' if text.nil?
-    # messenger usernames may only contain lowercase letters, numbers,
+    # slack usernames may only contain lowercase letters, numbers,
     # dashes, dots and underscores and must start with a letter or number.
     text.scan(/@[a-z0-9][a-z0-9_\-.]*/).uniq
   end
