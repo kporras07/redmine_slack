@@ -11,11 +11,11 @@ module RedmineSlack
 
       module InstanceMethods
         def send_redmine_slack_create
-          return unless RedmineSlack.setting_for_project(project, :post_wiki)
+          return unless Slack.setting_for_project(project, :post_wiki)
 
           set_language_if_valid Setting.default_language
 
-          channels = RedmineSlack.channels_for_project project
+          channels = Slack.channels_for_project project
 
           return unless channels.present?
 
@@ -23,12 +23,12 @@ module RedmineSlack
           attachment[:fields] = []
           attachment[:fields] << {
             title: 'Content',
-            value: RedmineSlack.trim(text, project),
+            value: Slack.trim(text, project),
             short: false
           }
 
-          RedmineSlack.speak(l(:label_redmine_slack_wiki_created,
-                            project_url: "<#{RedmineSlack.object_url project}|#{ERB::Util.html_escape(project)}>",
+          Slack.speak(l(:label_redmine_slack_wiki_created,
+                            project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
                             url: "<#{Rails.application.routes.url_for(
                               :controller => 'wiki',
                               :action => 'show',
@@ -41,18 +41,18 @@ module RedmineSlack
         end
 
         def send_redmine_slack_update
-          return unless RedmineSlack.setting_for_project(project, :post_wiki_updates)
+          return unless Slack.setting_for_project(project, :post_wiki_updates)
 
           set_language_if_valid Setting.default_language
 
-          channels = RedmineSlack.channels_for_project project
+          channels = Slack.channels_for_project project
 
           return unless channels.present?
 
           attachment = nil
           if comments.present?
             attachment = {}
-            attachment[:text] = RedmineSlack.markup_format(comments.to_s)
+            attachment[:text] = Slack.markup_format(comments.to_s)
           end
 
           version_to = version
@@ -90,13 +90,13 @@ module RedmineSlack
           end
 
           send_message = true
-          if (RedmineSlack.setting_for_project(project, :supress_empty_messages))
+          if (Slack.setting_for_project(project, :supress_empty_messages))
             send_message = false unless (attachment.any? && (attachment.key?(:text) || attachment.key?(:fields)))
           end
 
           if send_message
-            RedmineSlack.speak(l(:label_redmine_slack_wiki_updated,
-                              project_url: "<#{RedmineSlack.object_url project}|#{ERB::Util.html_escape(project)}>",
+            Slack.speak(l(:label_redmine_slack_wiki_updated,
+                              project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
                               url: "<#{Rails.application.routes.url_for(
                                 :controller => 'wiki',
                                 :action => 'show',

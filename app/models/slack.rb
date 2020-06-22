@@ -31,18 +31,7 @@ class Slack
       link_names: 1
     }
 
-    username = Slack.textfield_for_project(options[:project], :redmine_slack_username)
-    params[:username] = username if username.present?
     params[:attachments] = [options[:attachment]] if options[:attachment]&.any?
-
-    icon = Slack.textfield_for_project(options[:project], :redmine_slack_icon)
-    if icon.present?
-      if icon.start_with? ':'
-        params[:icon_emoji] = icon
-      else
-        params[:icon_url] = icon
-      end
-    end
 
     channels.each do |channel|
       uri = URI(url)

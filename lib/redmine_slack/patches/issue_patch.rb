@@ -11,16 +11,16 @@ module RedmineSlack
 
       module InstanceMethods
         def send_redmine_slack_create
-          channels = RedmineSlack.channels_for_project project
+          channels = Slack.channels_for_project project
 
           return unless channels.present?
-          return if is_private? && !RedmineSlack.setting_for_project(project, :post_private_issues)
+          return if is_private? && !Slack.setting_for_project(project, :post_private_issues)
 
           set_language_if_valid Setting.default_language
 
           attachment = {}
-          if description.present? && RedmineSlack.setting_for_project(project, :new_include_description)
-            attachment[:text] = RedmineSlack.markup_format(RedmineSlack.trim(description, project))
+          if description.present? && Slack.setting_for_project(project, :new_include_description)
+            attachment[:text] = Slack.markup_format(Slack.trim(description, project))
           end
           attachment[:fields] = [{ title: I18n.t(:field_status),
                                    value: ERB::Util.html_escape(status.to_s),
@@ -35,8 +35,8 @@ module RedmineSlack
           end
 
           if attachment.any? && attachment.key?(:text)
-            RedmineSlack.speak(l(:label_redmine_slack_issue_created,
-                              project_url: "<#{RedmineSlack.object_url project}|#{ERB::Util.html_escape(project)}>",
+            Slack.speak(l(:label_redmine_slack_issue_created,
+                              project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
                               url: send_redmine_slack_mention_url(project, description),
                               user: author),
                             channels, attachment: attachment, project: project)
@@ -46,23 +46,23 @@ module RedmineSlack
         def send_redmine_slack_update
           return if current_journal.nil?
 
-          channels = RedmineSlack.channels_for_project project
+          channels = Slack.channels_for_project project
 
-          return unless channels.present? && RedmineSlack.setting_for_project(project, :post_updates)
-          return if is_private? && !RedmineSlack.setting_for_project(project, :post_private_issues)
-          return if current_journal.private_notes? && !RedmineSlack.setting_for_project(project, :post_private_notes)
+          return unless channels.present? && Slack.setting_for_project(project, :post_updates)
+          return if is_private? && !Slack.setting_for_project(project, :post_private_issues)
+          return if current_journal.private_notes? && !Slack.setting_for_project(project, :post_private_notes)
 
           set_language_if_valid Setting.default_language
 
           attachment = {}
           text_diff = {}
 
-          if current_journal.notes.present? && RedmineSlack.setting_for_project(project, :updated_include_description)
-            attachment[:text] = RedmineSlack.markup_format(RedmineSlack.trim(current_journal.notes, project))
+          if current_journal.notes.present? && Slack.setting_for_project(project, :updated_include_description)
+            attachment[:text] = Slack.markup_format(Slack.trim(current_journal.notes, project))
           end
 
           current_journal.details.each do |detail|
-            if detail && detail.prop_key == "description" && detail.value.present? && detail.old_value.present? && RedmineSlack.setting_for_project(project, :updated_include_description)
+            if detail && detail.prop_key == "description" && detail.value.present? && detail.old_value.present? && Slack.setting_for_project(project, :updated_include_description)
               diff = Diffy.new(detail.old_value, detail.value, :context => 1)
               diff_elements = []
               diff.each_with_index do |item, index|
@@ -83,7 +83,7 @@ module RedmineSlack
               end
               text_diff = {
                 title: 'Description Differences',
-                value: RedmineSlack.trim(diff_elements.to_a.join("\r\n"), project),
+                value: Slack.trim(diff_elements.to_a.join("\r\n"), project),
                 short: false
               }
               # Finally, delete description from details to avoid including it as a field.
@@ -91,7 +91,7 @@ module RedmineSlack
             end
           end
 
-          fields = current_journal.details.map { |d| RedmineSlack.detail_to_field d, project }
+          fields = current_journal.details.map { |d| Slack.detail_to_field d, project }
           if status_id != status_id_was
             fields << { title: I18n.t(:field_status),
                         value: ERB::Util.html_escape(status.to_s),
@@ -115,13 +115,13 @@ module RedmineSlack
           attachment[:fields] = fields if fields.any?
 
           send_message = true
-          if (RedmineSlack.setting_for_project(project, :supress_empty_messages))
+          if (Slack.setting_for_project(project, :supress_empty_messages))
             send_message = false unless ((attachment.any? && (attachment.key?(:text))) || !text_diff.empty?)
           end
 
           if send_message
-            RedmineSlack.speak(l(:label_redmine_slack_issue_updated,
-                              project_url: "<#{RedmineSlack.object_url project}|#{ERB::Util.html_escape(project)}>",
+            Slack.speak(l(:label_redmine_slack_issue_updated,
+                              project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
                               url: send_redmine_slack_mention_url(project, current_journal.notes),
                               user: current_journal.user),
                             channels, attachment: attachment, project: project)
@@ -132,11 +132,11 @@ module RedmineSlack
 
         def send_redmine_slack_mention_url(project, text)
           mention_to = ''
-          if RedmineSlack.setting_for_project(project, :auto_mentions) ||
-             RedmineSlack.textfield_for_project(project, :default_mentions).present?
-            mention_to = RedmineSlack.mentions(project, text)
+          if Slack.setting_for_project(project, :auto_mentions) ||
+             Slack.textfield_for_project(project, :default_mentions).present?
+            mention_to = Slack.mentions(project, text)
           end
-          "<#{RedmineSlack.object_url(self)}|#{self}>#{mention_to}"
+          "<#{Slack.object_url(self)}|#{self}>#{mention_to}"
         end
       end
     end

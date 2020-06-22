@@ -5,12 +5,12 @@ module RedmineSlack
       journal = issue.current_journal
       changeset = context[:changeset]
 
-      channels = RedmineSlack.channels_for_project issue.project
+      channels = Slack.channels_for_project issue.project
 
-      return unless channels.present?  && issue.changes.any? && RedmineSlack.setting_for_project(issue.project, :post_updates)
-      return if issue.is_private? && !RedmineSlack.setting_for_project(issue.project, :post_private_issues)
+      return unless channels.present?  && issue.changes.any? && Slack.setting_for_project(issue.project, :post_updates)
+      return if issue.is_private? && !Slack.setting_for_project(issue.project, :post_private_issues)
 
-      msg = "[#{ERB::Util.html_escape(issue.project)}] #{ERB::Util.html_escape(journal.user.to_s)} updated <#{RedmineSlack.object_url issue}|#{ERB::Util.html_escape(issue)}>"
+      msg = "[#{ERB::Util.html_escape(issue.project)}] #{ERB::Util.html_escape(journal.user.to_s)} updated <#{Slack.object_url issue}|#{ERB::Util.html_escape(issue)}>"
 
       repository = changeset.repository
 
@@ -43,9 +43,9 @@ module RedmineSlack
 
       attachment = {}
       attachment[:text] = ll(Setting.default_language, :text_status_changed_by_changeset, "<#{revision_url}|#{ERB::Util.html_escape(changeset.comments)}>")
-      attachment[:fields] = journal.details.map { |d| RedmineSlack.detail_to_field d }
+      attachment[:fields] = journal.details.map { |d| Slack.detail_to_field d }
 
-      RedmineSlack.speak(msg, channels, attachment: attachment, project: repository.project)
+      Slack.speak(msg, channels, attachment: attachment, project: repository.project)
     end
   end
 end
