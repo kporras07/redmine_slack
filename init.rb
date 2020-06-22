@@ -16,7 +16,8 @@ Redmine::Plugin.register :redmine_slack do
   permission :manage_redmine_slack, projects: :settings, redmine_slack_settings: :update
 
   settings default: {
-    redmine_slack_url: '',
+    redmine_slack_token: '',
+    redmine_slack_verification_token: '',
     redmine_slack_channel: 'redmine',
     redmine_slack_verify_ssl: '1',
     auto_mentions: '0',

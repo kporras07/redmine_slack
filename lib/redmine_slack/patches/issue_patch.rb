@@ -12,9 +12,8 @@ module RedmineSlack
       module InstanceMethods
         def send_redmine_slack_create
           channels = RedmineSlack.channels_for_project project
-          url = RedmineSlack.url_for_project project
 
-          return unless channels.present? && url
+          return unless channels.present?
           return if is_private? && !RedmineSlack.setting_for_project(project, :post_private_issues)
 
           set_language_if_valid Setting.default_language
@@ -40,7 +39,7 @@ module RedmineSlack
                               project_url: "<#{RedmineSlack.object_url project}|#{ERB::Util.html_escape(project)}>",
                               url: send_redmine_slack_mention_url(project, description),
                               user: author),
-                            channels, url, attachment: attachment, project: project)
+                            channels, attachment: attachment, project: project)
           end
         end
 
@@ -48,9 +47,8 @@ module RedmineSlack
           return if current_journal.nil?
 
           channels = RedmineSlack.channels_for_project project
-          url = RedmineSlack.url_for_project project
 
-          return unless channels.present? && url && RedmineSlack.setting_for_project(project, :post_updates)
+          return unless channels.present? && RedmineSlack.setting_for_project(project, :post_updates)
           return if is_private? && !RedmineSlack.setting_for_project(project, :post_private_issues)
           return if current_journal.private_notes? && !RedmineSlack.setting_for_project(project, :post_private_notes)
 
@@ -126,7 +124,7 @@ module RedmineSlack
                               project_url: "<#{RedmineSlack.object_url project}|#{ERB::Util.html_escape(project)}>",
                               url: send_redmine_slack_mention_url(project, current_journal.notes),
                               user: current_journal.user),
-                            channels, url, attachment: attachment, project: project)
+                            channels, attachment: attachment, project: project)
           end
         end
 

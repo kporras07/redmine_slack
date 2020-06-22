@@ -3,13 +3,13 @@
 .info = t(:redmine_slack_settings_intro)
 br
 p
-  = content_tag(:label, l(:label_settings_redmine_slack_url))
-  = text_field_tag('settings[redmine_slack_url]', @settings[:redmine_slack_url], size: 60, placeholder: 'https://webhook.url')
-  em.info = t(:redmine_slack_url_info_html)
+  = content_tag(:label, l(:label_settings_redmine_slack_token))
+  = text_field_tag('settings[redmine_slack_token]', @settings[:redmine_slack_token], size: 60, placeholder: '')
+  em.info = t(:redmine_slack_token_info_html)
 p
-  = content_tag(:label, l(:label_settings_redmine_slack_url))
-  = text_field_tag('settings[redmine_slack_url]', @settings[:redmine_slack_url], size: 60, placeholder: 'https://webhook.url')
-  em.info = t(:redmine_slack_url_info_html)
+  = content_tag(:label, l(:label_settings_redmine_slack_verification_token))
+  = text_field_tag('settings[redmine_slack_verification_token]', @settings[:redmine_slack_verification_token], size: 60, placeholder: '')
+  em.info = t(:redmine_slack_verification_token_info_html)
 p
   = content_tag(:label, l(:label_settings_redmine_slack_channel))
   = text_field_tag('settings[redmine_slack_channel]', @settings[:redmine_slack_channel], size: 30, placeholder: 'redmine')

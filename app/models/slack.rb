@@ -19,8 +19,9 @@ class Slack
     { only_path: true, script_name: Redmine::Utils.relative_url_root }
   end
 
-  def self.speak(msg, channels, url, options)
-    url ||= RedmineSlack.settings[:redmine_slack_url]
+  def self.speak(msg, channels, options)
+    #TODO: HERE!!!!
+    url = "https://slack.com/api/chat.postMessage"
 
     return if url.blank?
     return if channels.blank?
@@ -72,22 +73,6 @@ class Slack
     else
       Rails.application.routes.url_for(obj.event_url(host: Setting.host_name, protocol: Setting.protocol, script_name: ''))
     end
-  end
-
-  def self.url_for_project(proj)
-    return if proj.blank?
-
-    # project based
-    pm = RedmineSlackSetting.find_by(project_id: proj.id)
-    return pm.redmine_slack_url if !pm.nil? && pm.redmine_slack_url.present?
-
-    # parent project based
-    parent_url = url_for_project(proj.parent)
-    return parent_url if parent_url.present?
-    # system based
-    return RedmineSlack.settings[:redmine_slack_url] if RedmineSlack.settings[:redmine_slack_url].present?
-
-    nil
   end
 
   def self.textfield_for_project(proj, config)

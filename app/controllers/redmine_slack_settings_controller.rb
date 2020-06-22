@@ -19,7 +19,8 @@ class RedmineSlackSettingsController < ApplicationController
   private
 
   def allowed_params
-    params.require(:setting).permit :redmine_slack_url,
+    params.require(:setting).permit :redmine_slack_token,
+                                    :redmine_slack_verification_token,
                                     :redmine_slack_channel,
                                     :redmine_slack_verify_ssl,
                                     :auto_mentions,

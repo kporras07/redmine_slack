@@ -16,9 +16,8 @@ module RedmineSlack
           set_language_if_valid Setting.default_language
 
           channels = RedmineSlack.channels_for_project project
-          url = RedmineSlack.url_for_project project
 
-          return unless channels.present? && url
+          return unless channels.present?
 
           attachment = {}
           attachment[:fields] = []
@@ -38,7 +37,7 @@ module RedmineSlack
                               :host => Setting.host_name
                             )}|#{page.title}>",
                             user: User.current),
-                          channels, url, project: project, attachment: attachment)
+                          channels, project: project, attachment: attachment)
         end
 
         def send_redmine_slack_update
@@ -47,9 +46,8 @@ module RedmineSlack
           set_language_if_valid Setting.default_language
 
           channels = RedmineSlack.channels_for_project project
-          url = RedmineSlack.url_for_project project
 
-          return unless channels.present? && url
+          return unless channels.present?
 
           attachment = nil
           if comments.present?
@@ -107,7 +105,7 @@ module RedmineSlack
                                 :host => Setting.host_name
                               )}|#{page.title}>",
                               user: User.current),
-                            channels, url, project: project, attachment: attachment)
+                            channels, project: project, attachment: attachment)
           end
         end
       end

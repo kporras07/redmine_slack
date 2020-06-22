@@ -16,7 +16,8 @@ en:
   label_settings_auto_mentions: Convert names to mentions?
   label_settings_default_mentions: Default people for mentions
   label_settings_redmine_slack_channel: Redmine Slack Channel
-  label_settings_redmine_slack_url: Redmine Slack URL
+  label_settings_redmine_slack_token: Redmine Slack Token
+  label_settings_redmine_slack_verification_token: Redmine Slack Verification Token
   label_settings_redmine_slack_verify_ssl: Verify SSL
   label_settings_new_include_description: New issue description?
   label_settings_post_private_issues: Private issue updates?
@@ -32,7 +33,8 @@ en:
   redmine_slack_issue_intro: Activate the changes for Issues that should be sent to the pre-defined Redmine Slack channel.
   redmine_slack_settings_intro: "Leave the Redmine Slack URL in the administration area empty in order to send no messages from Redmine to the Redmine Slack. No matter what else you have configured here. In case you wish to send messages of all Redmine projects to the Redmine Slack fill out the URL. The messages will be sent to the specific channel. If you want only to be notified by some of the projects (not all) leave the messenger URL here blank and go to the specific project configuration."
   redmine_slack_settings_project_intro: "If you left empty the Redmine Slack URL in the administration area in case to be not globally notified by all project changes you can configure your Redmine Slack URL in the project settings."
-  redmine_slack_url_info_html: 'Generate an <a target="_blank" href="https://github.com/AlphaNodes/redmine_redmine_slack#prepare-your-messenger-service">Incoming WebHook</a> URL from the messenger service. Leave it empty, if you only want to activate specific projects with project based settings'
+  redmine_slack_token_info_html: 'Generate a token from your Slack app'
+  redmine_slack_verification_token_info_html: 'Paste the verification token from your Slack app'
   redmine_slack_verify_ssl_info_html: 'If your Redmine Slack service uses an invalid or self-signed SSL certificate, disable it.'
   redmine_slack_wiki_intro: Activate the changes for Wikis that should be sent to the pre-defined Redmine Slack channel.
   permission_manage_redmine_slack: Manage messenger

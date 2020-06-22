@@ -10,7 +10,14 @@
       .info = t(:redmine_slack_settings_project_intro)
       br
       p
-        = f.text_field :redmine_slack_url, size: 60, label: l(:label_settings_redmine_slack_url)
+        = f.text_field :redmine_slack_token, size: 60, label: l(:label_settings_redmine_slack_token)
+        em.info
+          = l(:label_redmine_slack_project_text_field_info)
+          |  (
+          = l(:label_redmine_slack_default_not_visible)
+          | )
+      p
+        = f.text_field :redmine_slack_verification_token, size: 60, label: l(:label_settings_redmine_slack_verification_token)
         em.info
           = l(:label_redmine_slack_project_text_field_info)
           |  (
