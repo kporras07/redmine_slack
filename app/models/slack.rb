@@ -1,20 +1,14 @@
 require 'net/http'
 
-class RedmineSlack
+class Slack
   include Redmine::I18n
 
   def self.markup_format(text)
-    # TODO: output format should be markdown, but at the moment there is no
-    #       solution without using pandoc (http://pandoc.org/), which requires
-    #       packages on os level
-    #
-    # Redmine::WikiFormatting.html_parser.to_text(text)
-    # We really do not need to escape text.
     text
   end
 
   def self.trim(msg, project)
-    trim_size = RedmineSlack.textfield_for_project(project, :text_trim_size).to_i
+    trim_size = Slack.textfield_for_project(project, :text_trim_size).to_i
     if trim_size > 0
       msg = msg[0..trim_size]
     end
@@ -36,11 +30,11 @@ class RedmineSlack
       link_names: 1
     }
 
-    username = RedmineSlack.textfield_for_project(options[:project], :redmine_slack_username)
+    username = Slack.textfield_for_project(options[:project], :redmine_slack_username)
     params[:username] = username if username.present?
     params[:attachments] = [options[:attachment]] if options[:attachment]&.any?
 
-    icon = RedmineSlack.textfield_for_project(options[:project], :redmine_slack_icon)
+    icon = Slack.textfield_for_project(options[:project], :redmine_slack_icon)
     if icon.present?
       if icon.start_with? ':'
         params[:icon_emoji] = icon
@@ -134,7 +128,7 @@ class RedmineSlack
     return parent_channel if parent_channel.present?
     # system based
     if RedmineSlack.settings[:redmine_slack_channel].present? &&
-       RedmineSlack.settings[:redmine_slack_channel] != '-'
+      RedmineSlack.settings[:redmine_slack_channel] != '-'
       return RedmineSlack.settings[:redmine_slack_channel].split(',').map!(&:strip).uniq
     end
 
@@ -194,7 +188,7 @@ class RedmineSlack
     case key
     when 'description'
       short = false
-      value = RedmineSlack.trim(value, project)
+      value = Slack.trim(value, project)
     when 'title', 'subject'
       short = false
     when 'tracker'
@@ -220,11 +214,11 @@ class RedmineSlack
       value = fixed_version.to_s if fixed_version.present?
     when 'attachment'
       attachment = Attachment.find(detail.prop_key)
-      value = "<#{RedmineSlack.object_url attachment}|#{ERB::Util.html_escape(attachment.filename)}>" if attachment.present?
+      value = "<#{Slack.object_url attachment}|#{ERB::Util.html_escape(attachment.filename)}>" if attachment.present?
       escape = false
     when 'parent'
       issue = Issue.find(detail.value)
-      value = "<#{RedmineSlack.object_url issue}|#{ERB::Util.html_escape(issue)}>" if issue.present?
+      value = "<#{Slack.object_url issue}|#{ERB::Util.html_escape(issue)}>" if issue.present?
       escape = false
     end
 
@@ -250,7 +244,7 @@ class RedmineSlack
 
   def self.mentions(project, text)
     names = []
-    RedmineSlack.textfield_for_project(project, :default_mentions)
+    Slack.textfield_for_project(project, :default_mentions)
              .split(',').each { |m| names.push m.strip }
     names += extract_usernames(text) unless text.nil?
     names.present? ? ' To: ' + names.uniq.join(', ') : nil

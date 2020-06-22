@@ -35,14 +35,6 @@ module RedmineSlack
                                      short: true }
           end
 
-          if RedmineSlack.setting?(:display_watchers) && watcher_users.count.positive?
-            attachment[:fields] << {
-              title: I18n.t(:field_watcher),
-              value: ERB::Util.html_escape(watcher_users.join(', ')),
-              short: true
-            }
-          end
-
           if attachment.any? && attachment.key?(:text)
             RedmineSlack.speak(l(:label_redmine_slack_issue_created,
                               project_url: "<#{RedmineSlack.object_url project}|#{ERB::Util.html_escape(project)}>",

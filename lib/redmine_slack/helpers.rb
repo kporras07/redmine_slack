@@ -7,7 +7,7 @@ module RedmineSlack
     end
 
     def project_setting_redmine_slack_default_value(value)
-      if RedmineSlack.default_project_setting(@project, value)
+      if Slack.default_project_setting(@project, value)
         l(:label_redmine_slack_settings_enabled)
       else
         l(:label_redmine_slack_settings_disabled)

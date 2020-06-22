@@ -24,7 +24,6 @@
       .info = t(:redmine_slack_issue_intro)
       br
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :auto_mentions }
-      = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :display_watchers }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_updates }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :new_include_description }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :updated_include_description }
