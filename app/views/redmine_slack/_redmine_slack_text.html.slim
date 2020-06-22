@@ -1,0 +1,9 @@
+p
+  = f.text_field mf, size: size, label: l("label_settings_#{mf}")
+  em.info
+    = l(:label_redmine_slack_project_text_field_info)
+    |  (
+    = l(:label_default)
+    ' :
+    = RedmineSlack.default_textfield(@project, mf)
+    | )

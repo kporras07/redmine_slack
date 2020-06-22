@@ -1,0 +1,49 @@
+language: ruby
+
+rvm:
+  - 2.5.3
+  - 2.4.5
+  - 2.3.8
+
+env:
+  - REDMINE_VER=4.0-stable DB=postgresql
+  - REDMINE_VER=3.4-stable DB=postgresql
+
+sudo: true
+
+addons:
+  postgresql: "9.6"
+
+notifications:
+  webhooks:
+    urls:
+      secure: "lwJzu9BU7AVhHnROzEA6agagwsqVAaTzgtvwTlw4CwSUv0ypNXNi9kjJUvOgSit3BnkSccC9xYlYNOYw5OOmsmjyUDU4/LUVqd0DRQjW3FXU9EFFPGQq9srJikHOHobfnutxGwMYFE4ftLI08PzsL7bYEg39Ps3pwwWsiIKnKKI0DPmdQH5PzC63jF/EByrLZsfqGHOirgXDnxmwgmrQ14vOpp3lHjgNgx9wNALpSgAztKeK1Wd8KayLYXweu+LQx9IwJfLqvk6hhWW15vjkIhvK7ooYSGXx+Hlwg3jyFSyX5jButUT4vwlWdJeAoNO/sWpdKXv4AifGXYsbcF/LMHCaaVgwBm/pe/YlK2LrqFlpm7MFuqyO1w4AnIA7rC8wZp/dUU5bJITZgN3sTAbLyTIbF8cbMfbDy3IWP8Oub7K/0ATUD7vNBVuyxfdGG61xOv/RDQhzrGwUArJ/xJfdU77MZkQUnaGb0vcwmRLIxyPdZWPz9ntzCbBxFblPWApCw+CWOeM3OuR6tdVqSVuZx3aG87TTzW+S9lLe8PJ5HYgA6+rPkc04zolJMftnFVlUl3LQIKvV2QkPSnr9bcePR5YSoJJKLBVofUsg/btVkQ1OxhWn53Td/nQp7u8qosmyQjCjMiP6Po1e9Enr89FY8Yxkw2dQba5sumQRbB39bj0="
+    on_success: change
+    on_failure: always
+
+before_install:
+  - export PLUGIN_NAME=redmine_messenger
+  - export REDMINE_GIT_REPO=git://github.com/redmine/redmine.git
+  - export REDMINE_PATH=$HOME/redmine
+  - export BUNDLE_GEMFILE=$REDMINE_PATH/Gemfile
+  - git clone $REDMINE_GIT_REPO $REDMINE_PATH
+  - cd $REDMINE_PATH
+  - if [[ "$REDMINE_VER" != "master" ]]; then git checkout -b $REDMINE_VER origin/$REDMINE_VER; fi
+  - ln -s $TRAVIS_BUILD_DIR $REDMINE_PATH/plugins/$PLUGIN_NAME
+  - cp $TRAVIS_BUILD_DIR/test/support/additional_environment.rb $REDMINE_PATH/config/
+  - cp $TRAVIS_BUILD_DIR/test/support/database-$DB-travis.yml $REDMINE_PATH/config/database.yml
+
+before_script:
+  # - bundle exec rake redmine:load_default_data REDMINE_LANG=en
+  # - bundle exec rake db:structure:dump
+  - psql -c 'create database travis_ci_test;' -U postgres
+  # - bundle exec rake db:create
+  - bundle exec rake db:migrate
+  - bundle exec rake redmine:plugins:migrate
+
+script:
+  - export SKIP_COVERAGE=1
+  - if [[ "$REDMINE_VER" == "master" ]]; then bundle exec rake redmine:plugins:test:units NAME=$PLUGIN_NAME; fi
+  - if [[ "$REDMINE_VER" == "master" ]]; then bundle exec rake redmine:plugins:test:functionals NAME=$PLUGIN_NAME; fi
+  - if [[ "$REDMINE_VER" == "master" ]]; then bundle exec rake redmine:plugins:test:integration NAME=$PLUGIN_NAME; fi
+  - if [[ "$REDMINE_VER" != "master" ]]; then bundle exec rake redmine:plugins:test NAME=$PLUGIN_NAME RUBYOPT="-W0"; fi
