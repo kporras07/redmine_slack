@@ -1,5 +1,8 @@
-require File.expand_path('../../test_helper', __FILE__)
+# frozen_string_literal: true
 
+require File.expand_path('../test_helper', __dir__)
+
+# Projects basic test.
 class ProjectTest < ActiveSupport::TestCase
   fixtures :projects, :trackers, :issue_statuses, :issues,
            :journals, :journal_details,

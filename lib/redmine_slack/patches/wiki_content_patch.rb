@@ -1,5 +1,10 @@
+# frozen_string_literal: true
+
+# Redmine Slack module to add patches.
 module RedmineSlack
+  # Patches module.
   module Patches
+    # Patches for wiki content.
     module WikiContentPatch
       def self.included(base)
         base.send(:include, InstanceMethods)
@@ -9,6 +14,7 @@ module RedmineSlack
         end
       end
 
+      # Instance methods.
       module InstanceMethods
         def send_redmine_slack_create
           return unless Slack.setting_for_project(project, :post_wiki)
@@ -17,7 +23,7 @@ module RedmineSlack
 
           channels = Slack.channels_for_project project
 
-          return unless channels.present?
+          return if channels.blank?
 
           attachment = {}
           attachment[:fields] = []
@@ -28,16 +34,16 @@ module RedmineSlack
           }
 
           Slack.speak(l(:label_redmine_slack_wiki_created,
-                            project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
-                            url: "<#{Rails.application.routes.url_for(
-                              :controller => 'wiki',
-                              :action => 'show',
-                              :project_id => project,
-                              :id => page.title,
-                              :host => Setting.host_name
-                            )}|#{page.title}>",
-                            user: User.current),
-                          channels, project: project, attachment: attachment)
+                        project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
+                        url: "<#{Rails.application.routes.url_for(
+                          :controller => 'wiki',
+                          :action => 'show',
+                          :project_id => project,
+                          :id => page.title,
+                          :host => Setting.host_name
+                        )}|#{page.title}>",
+                        user: User.current),
+                      channels, project: project, attachment: attachment)
         end
 
         def send_redmine_slack_update
@@ -47,7 +53,7 @@ module RedmineSlack
 
           channels = Slack.channels_for_project project
 
-          return unless channels.present?
+          return if channels.blank?
 
           attachment = nil
           if comments.present?
@@ -57,30 +63,24 @@ module RedmineSlack
 
           version_to = version
 
-          content_to = versions.find_by_version(version_to)
+          content_to = versions.find_by(version: version_to)
           content_from = content_to.try(:previous)
           if content_to && content_from
             diff = Diffy.new(content_from.data, content_to.data, :context => 1)
             diff_elements = []
-            diff.each_with_index do |item, index|
-              item_stripped = item.strip.gsub("\r", "").gsub("\r\n", "")
+            diff.each_with_index do |item, _index|
+              item_stripped = item.strip.delete("\r").gsub("\r\n", '')
               if item_stripped.length
                 if item[0] == '-'
-                  if item_stripped[1..-1].length > 1
-                    diff_elements << "~#{item_stripped[1..-1]}~"
-                  end
+                  diff_elements << "~#{item_stripped[1..-1]}~" if item_stripped[1..-1].length > 1
                 elsif item[0] == '+'
-                  if item_stripped[1..-1].length > 1
-                    diff_elements << "_#{item_stripped[1..-1]}_"
-                  end
+                  diff_elements << "_#{item_stripped[1..-1]}_" if item_stripped[1..-1].length > 1
                 else
-                  diff_elements << item_stripped unless item_stripped.include? "No newline at end of file"
+                  diff_elements << item_stripped unless item_stripped.include? 'No newline at end of file'
                 end
               end
             end
-            if attachment.nil?
-              attachment = {}
-            end
+            attachment = {} if attachment.nil?
             attachment[:fields] = []
             attachment[:fields] << {
               title: 'Content Differences',
@@ -90,23 +90,23 @@ module RedmineSlack
           end
 
           send_message = true
-          if (Slack.setting_for_project(project, :supress_empty_messages))
-            send_message = false unless (attachment.any? && (attachment.key?(:text) || attachment.key?(:fields)))
+          if Slack.setting_for_project(project, :supress_empty_messages)
+            send_message = false unless attachment.any? && (attachment.key?(:text) || attachment.key?(:fields))
           end
 
-          if send_message
-            Slack.speak(l(:label_redmine_slack_wiki_updated,
-                              project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
-                              url: "<#{Rails.application.routes.url_for(
-                                :controller => 'wiki',
-                                :action => 'show',
-                                :project_id => project,
-                                :id => page.title,
-                                :host => Setting.host_name
-                              )}|#{page.title}>",
-                              user: User.current),
-                            channels, project: project, attachment: attachment)
-          end
+          return unless send_message
+
+          Slack.speak(l(:label_redmine_slack_wiki_updated,
+                        project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
+                        url: "<#{Rails.application.routes.url_for(
+                          :controller => 'wiki',
+                          :action => 'show',
+                          :project_id => project,
+                          :id => page.title,
+                          :host => Setting.host_name
+                        )}|#{page.title}>",
+                        user: User.current),
+                      channels, project: project, attachment: attachment)
         end
       end
     end

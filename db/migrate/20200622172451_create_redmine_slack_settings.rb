@@ -1,3 +1,4 @@
+# Initial migration.
 class CreateRedmineSlackSettings < ActiveRecord::Migration[5.2]
   def change
     create_table :redmine_slack_settings do |t|

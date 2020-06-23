@@ -21,6 +21,18 @@ require:
 
 # Rules for Redmine
 
+Rails/ApplicationRecord:
+  Enabled: false
+
+Rails/CreateTableWithTimestamps:
+  Enabled: false
+
+Rails/FilePath:
+  Enabled: false
+
+Style/ClassVars:
+  Enabled: false
+
 Bundler/OrderedGems:
   Enabled: false
 
