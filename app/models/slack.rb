@@ -203,20 +203,20 @@ class Slack
       priority = IssuePriority.find(detail.value)
       value = priority.to_s if priority.present?
     when 'category'
-      category = IssueCategory.find(detail.value)
+      category = detail.value ? IssueCategory.find(detail.value) : ''
       value = category.to_s if category.present?
     when 'assigned_to'
-      user = User.find(detail.value)
+      user = detail.value ? User.find(detail.value) : ''
       value = user.to_s if user.present?
     when 'fixed_version'
-      fixed_version = Version.find(detail.value)
+      fixed_version = detail.value ? Version.find(detail.value) : ''
       value = fixed_version.to_s if fixed_version.present?
     when 'attachment'
       attachment = Attachment.find(detail.prop_key)
       value = "<#{Slack.object_url attachment}|#{ERB::Util.html_escape(attachment.filename)}>" if attachment.present?
       escape = false
     when 'parent'
-      issue = Issue.find(detail.value)
+      issue = detail.value ? Issue.find(detail.value) : ''
       value = "<#{Slack.object_url issue}|#{ERB::Util.html_escape(issue)}>" if issue.present?
       escape = false
     end
