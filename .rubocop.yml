@@ -33,6 +33,9 @@ Rails/FilePath:
 Style/IfUnlessModifier:
   Enabled: false
 
+Style/ExpandPathArguments:
+  Enabled: false
+
 Style/ClassVars:
   Enabled: false
 
