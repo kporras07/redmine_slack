@@ -23,7 +23,6 @@ before_install:
   - cd $REDMINE_PATH
   - if [[ "$REDMINE_VER" != "master" ]]; then git checkout -b $REDMINE_VER origin/$REDMINE_VER; fi
   - ln -s $TRAVIS_BUILD_DIR $REDMINE_PATH/plugins/$PLUGIN_NAME
-  #- cp $TRAVIS_BUILD_DIR/test/support/additional_environment.rb $REDMINE_PATH/config/
   - cp $TRAVIS_BUILD_DIR/test/support/database-$DB-travis.yml $REDMINE_PATH/config/database.yml
 
 before_script:
