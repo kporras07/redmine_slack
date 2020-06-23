@@ -11,7 +11,7 @@ Redmine::Plugin.register :redmine_slack do
   url 'http://example.com/path/to/plugin'
   author_url 'http://example.com/about'
 
-  requires_redmine version_or_higher: '3.0.0'
+  requires_redmine version_or_higher: '4.0.0'
 
   permission :manage_redmine_slack, projects: :settings, redmine_slack_settings: :update
 
