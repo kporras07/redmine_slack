@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require File.expand_path('../../test_helper', __FILE__)
 
+# Test internationalization.
 class I18nTest < ActiveSupport::TestCase
   include Redmine::I18n
 
@@ -22,13 +25,13 @@ class I18nTest < ActiveSupport::TestCase
                                            'config',
                                            'locales',
                                            '*.yml')].size
-    assert_equal lang_files_count, 4
+    assert_equal lang_files_count, 2
     valid_languages.each do |lang|
       assert set_language_if_valid(lang)
     end
     # check if parse error exists
     ::I18n.locale = 'fr'
-    assert_equal 'Redmine Slack Settings', l(:label_redmine_slack_setting)
+    assert_equal 'Paramètres de Redmine Slack', l(:label_redmine_slack_setting)
     ::I18n.locale = 'en'
     assert_equal 'Redmine Slack Settings', l(:label_redmine_slack_setting)
     set_language_if_valid('en')

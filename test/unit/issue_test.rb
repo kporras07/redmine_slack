@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require File.expand_path('../../test_helper', __FILE__)
 
+# Issues basic test.
 class IssueTest < ActiveSupport::TestCase
   fixtures :projects, :users, :members, :member_roles, :roles,
            :trackers, :projects_trackers,

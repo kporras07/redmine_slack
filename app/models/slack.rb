@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 require 'net/http'
 require 'json'
 
+# Slack class.
 class Slack
   include Redmine::I18n
 
@@ -10,18 +13,16 @@ class Slack
 
   def self.trim(msg, project)
     trim_size = Slack.textfield_for_project(project, :text_trim_size).to_i
-    if trim_size > 0
-      msg = msg[0..trim_size]
-    end
+    msg = msg[0..trim_size] if trim_size.positive?
     msg
   end
 
   def self.default_url_options
-    { only_path: true, script_name: Redmine::Utils.relative_url_root }
+    {only_path: true, script_name: Redmine::Utils.relative_url_root}
   end
 
   def self.speak(msg, channels, options)
-    url = "https://slack.com/api/chat.postMessage"
+    url = 'https://slack.com/api/chat.postMessage'
     token = RedmineSlack.settings[:redmine_slack_token]
 
     return if url.blank?
@@ -30,7 +31,7 @@ class Slack
 
     params = {
       text: msg,
-      link_names: 1,
+      link_names: 1
     }
 
     params[:attachments] = [options[:attachment]] if options[:attachment]&.any?
@@ -38,7 +39,7 @@ class Slack
     channels.each do |channel|
       uri = URI(url)
       params[:channel] = channel
-      http_options = { use_ssl: uri.scheme == 'https' }
+      http_options = {use_ssl: uri.scheme == 'https'}
       http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:redmine_slack_verify_ssl)
 
       begin
@@ -61,9 +62,22 @@ class Slack
       host = Regexp.last_match(2)
       port = Regexp.last_match(4)
       prefix = Regexp.last_match(5)
-      Rails.application.routes.url_for(obj.event_url(host: host, protocol: Setting.protocol, port: port, script_name: prefix))
+      Rails.application.routes.url_for(
+        obj.event_url(
+          host: host,
+          protocol: Setting.protocol,
+          port: port,
+          script_name: prefix
+        )
+      )
     else
-      Rails.application.routes.url_for(obj.event_url(host: Setting.host_name, protocol: Setting.protocol, script_name: ''))
+      Rails.application.routes.url_for(
+        obj.event_url(
+          host: Setting.host_name,
+          protocol: Setting.protocol,
+          script_name: ''
+        )
+      )
     end
   end
 
@@ -105,7 +119,7 @@ class Slack
     return parent_channel if parent_channel.present?
     # system based
     if RedmineSlack.settings[:redmine_slack_channel].present? &&
-      RedmineSlack.settings[:redmine_slack_channel] != '-'
+       RedmineSlack.settings[:redmine_slack_channel] != '-'
       return RedmineSlack.settings[:redmine_slack_channel].split(',').map!(&:strip).uniq
     end
 
@@ -144,9 +158,17 @@ class Slack
     escape = true
 
     if detail.property == 'cf'
-      key = CustomField.find(detail.prop_key).name rescue nil
+      key = begin
+              CustomField.find(detail.prop_key).name
+            rescue StandardError
+              nil
+            end
       title = key
-      field_format = CustomField.find(detail.prop_key).field_format rescue nil
+      field_format = begin
+                       CustomField.find(detail.prop_key).field_format
+                     rescue StandardError
+                       nil
+                     end
     elsif detail.property == 'attachment'
       key = 'attachment'
       title = I18n.t :label_attachment
@@ -214,7 +236,7 @@ class Slack
               '-'
             end
 
-    result = { title: title, value: value }
+    result = {title: title, value: value}
     result[:short] = true if short
     result
   end
@@ -222,8 +244,8 @@ class Slack
   def self.mentions(project, text)
     names = []
     Slack.textfield_for_project(project, :default_mentions)
-             .split(',').each { |m| names.push m.strip }
-    names += self.extract_usernames(text) unless text.nil?
+         .split(',').each {|m| names.push m.strip}
+    names += extract_usernames(text) unless text.nil?
     names.present? ? ' To: ' + names.uniq.join(', ') : nil
   end
 

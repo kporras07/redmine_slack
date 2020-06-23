@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 $VERBOSE = nil
 
 unless ENV['SKIP_COVERAGE']
@@ -17,7 +19,9 @@ end
 
 require File.expand_path(File.dirname(__FILE__) + '/../../../test/test_helper')
 
+# Redmine slack test helper module.
 module RedmineSlack
+  # Test case class.
   class TestCase
     include ActionDispatch::TestProcess
 

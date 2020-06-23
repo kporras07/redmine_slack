@@ -1,57 +1,107 @@
-require: rubocop-performance
-
-Rails:
-  Enabled: true
-
 AllCops:
-  TargetRubyVersion: 2.3
+  TargetRubyVersion: 2.6
   TargetRailsVersion: 5.2
 
-Metrics/AbcSize:
-  Max: 65
+  Exclude:
+    - '**/vendor/**/*'
+    - '**/tmp/**/*'
+    - '**/bin/**/*'
+    - '**/plugins/**/*'
+    - '**/extra/**/*'
+    - '**/lib/generators/**/templates/*'
+    - '**/lib/tasks/**/*'
+    - '**/files/**/*'
+    - 'db/schema.rb'
 
-Metrics/BlockLength:
-  Max: 60
+# Enable extensions
 
-Metrics/ClassLength:
-  Max: 500
+require:
+  - rubocop-performance
+  - rubocop-rails
 
-Metrics/CyclomaticComplexity:
-  Max: 20
+# Rules for Redmine
 
-Metrics/LineLength:
-  Max: 140
-
-Metrics/MethodLength:
-  Max: 60
-
-Metrics/ModuleLength:
-  Max: 500
-
-Metrics/PerceivedComplexity:
-  Max: 25
-
-Rails/SkipsModelValidations:
+Rails/ApplicationRecord:
   Enabled: false
 
 Rails/CreateTableWithTimestamps:
   Enabled: false
 
-# we drop this, if we drop Rails 4.2 support
-Rails/ApplicationRecord:
-    Enabled: false
-
-Performance/ChainArrayAllocation:
-  Enabled: true
-
-Style/AutoResourceCleanup:
-  Enabled: true
-
-Style/FrozenStringLiteralComment:
+Rails/FilePath:
   Enabled: false
 
-Style/Documentation:
+Style/IfUnlessModifier:
   Enabled: false
 
 Style/ExpandPathArguments:
+  Enabled: false
+
+Style/ClassVars:
+  Enabled: false
+
+Bundler/OrderedGems:
+  Enabled: false
+
+Layout/EmptyLineBetweenDefs:
+  AllowAdjacentOneLineDefs: true
+
+Layout/SpaceBeforeBlockBraces:
+  # "space" is used more than "no_space".
+  # But "no_space" is more natural in one liner.
+  #   str = path.to_s.split(%r{[/\\]}).select{|p| !p.blank?}.join("/")
+  Enabled: false
+
+# You can see results by "rubocop --only Layout/SpaceInsideBlockBraces"
+Layout/SpaceInsideBlockBraces:
+  EnforcedStyle: no_space
+  SpaceBeforeBlockParameters: false
+
+# You can see results by "rubocop --only Layout/SpaceInsideHashLiteralBraces"
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: no_space
+
+Layout/TrailingWhitespace:
+  AllowInHeredoc: true
+
+Lint/SuppressedException:
+  AllowComments: true
+
+Metrics:
+  Enabled: false
+
+Naming/AccessorMethodName:
+  Enabled: false
+
+Naming/BinaryOperatorParameterName:
+  Enabled: false
+
+Naming/PredicateName:
+  Enabled: false
+
+Rails/HelperInstanceVariable:
+  Enabled: false
+
+Style/FormatStringToken:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+  Exclude:
+    - 'db/**/*.rb'
+    - 'Gemfile'
+    - 'Rakefile'
+    - 'config.ru'
+    - 'config/additional_environment.rb'
+
+Style/HashSyntax:
+  Enabled: true
+  EnforcedStyle: no_mixed_keys
+
+Style/IdenticalConditionalBranches:
+  Exclude:
+    - 'config/initializers/10-patches.rb'
+    - 'lib/redmine/wiki_formatting/textile/redcloth3.rb'
+
+Style/TrailingCommaInArrayLiteral:
   Enabled: false

@@ -1,4 +1,8 @@
-raise "\n\033[31mredmine_redmine_slack requires ruby 2.3 or newer. Please update your ruby version.\033[0m" if RUBY_VERSION < '2.3'
+# frozen_string_literal: true
+
+if RUBY_VERSION < '2.3'
+  raise "\n\033[31mredmine_redmine_slack requires ruby 2.3 or newer. Please update your ruby version.\033[0m"
+end
 
 require 'redmine'
 require 'redmine_slack'
@@ -11,7 +15,7 @@ Redmine::Plugin.register :redmine_slack do
   url 'http://example.com/path/to/plugin'
   author_url 'http://example.com/about'
 
-  requires_redmine version_or_higher: '3.0.0'
+  requires_redmine version_or_higher: '4.0.0'
 
   permission :manage_redmine_slack, projects: :settings, redmine_slack_settings: :update
 
@@ -30,6 +34,6 @@ Redmine::Plugin.register :redmine_slack do
     post_private_issues: '0',
     post_private_notes: '0',
     post_wiki: '0',
-    post_wiki_updates: '0',
+    post_wiki_updates: '0'
   }, partial: 'settings/redmine_slack_settings'
 end

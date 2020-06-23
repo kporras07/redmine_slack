@@ -1,6 +1,8 @@
-Rails.configuration.to_prepare do
-  module RedmineSlack
+# frozen_string_literal: true
 
+Rails.configuration.to_prepare do
+  # Redmine Slack module.
+  module RedmineSlack
     def self.settings
       if Setting[:plugin_redmine_slack].class == Hash
         if Rails.version >= '5.2'
@@ -25,12 +27,12 @@ Rails.configuration.to_prepare do
   end
 
   # Patches
-  Issue.send(:include, RedmineSlack::Patches::IssuePatch)
-  WikiContent.send(:include, RedmineSlack::Patches::WikiContentPatch)
+  Issue.include RedmineSlack::Patches::IssuePatch
+  WikiContent.include RedmineSlack::Patches::WikiContentPatch
   ProjectsController.send :helper, RedmineSlackProjectsHelper
 
   # Global helpers
-  ActionView::Base.send :include, RedmineSlack::Helpers
+  ActionView::Base.include RedmineSlack::Helpers
 
   # Hooks
   require_dependency 'redmine_slack/hooks'
