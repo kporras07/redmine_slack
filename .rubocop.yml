@@ -30,6 +30,9 @@ Rails/CreateTableWithTimestamps:
 Rails/FilePath:
   Enabled: false
 
+Style/IfUnlessModifier:
+  Enabled: false
+
 Style/ClassVars:
   Enabled: false
 
