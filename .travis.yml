@@ -35,4 +35,4 @@ script:
   - if [[ "$REDMINE_VER" == "master" ]]; then bundle exec rake redmine:plugins:test:units NAME=$PLUGIN_NAME; fi
   - if [[ "$REDMINE_VER" == "master" ]]; then bundle exec rake redmine:plugins:test:functionals NAME=$PLUGIN_NAME; fi
   - if [[ "$REDMINE_VER" == "master" ]]; then bundle exec rake redmine:plugins:test:integration NAME=$PLUGIN_NAME; fi
-  - if [[ "$REDMINE_VER" != "master" ]]; then bundle exec rake redmine:plugins:test NAME=$PLUGIN_NAME RUBYOPT="-W0"; fi
+  - if [[ "$REDMINE_VER" != "master" ]]; then bundle exec rake redmine:plugins:test NAME=$PLUGIN_NAME; fi
