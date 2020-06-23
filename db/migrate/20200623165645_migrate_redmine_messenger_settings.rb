@@ -4,7 +4,7 @@ class MigrateRedmineMessengerSettings < ActiveRecord::Migration[5.2]
     return unless Redmine::Plugin.installed?('redmine_messenger')
 
     MessengerSetting.where('messenger_url IS NOT NULL').each do |setting|
-      next if RedmineSlackSetting.where('project_id = :p_id', {p_id: setting.project_id}).exists?
+      next if RedmineSlackSetting.where('project_id = :p_id', p_id: setting.project_id).exists?
 
       new_setting = RedmineSlackSetting.find_or_create(setting.project_id)
       new_setting.redmine_slack_channel = setting.messenger_channel
