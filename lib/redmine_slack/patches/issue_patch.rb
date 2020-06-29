@@ -42,6 +42,8 @@ module RedmineSlack
 
           return unless attachment.any? && attachment.key?(:text)
 
+          attachment[:color] = '#00FF00'
+
           Slack.speak(l(:label_redmine_slack_issue_created,
                         project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
                         url: send_redmine_slack_mention_url(project, description),
@@ -126,6 +128,8 @@ module RedmineSlack
           end
 
           return unless send_message
+
+          attachment[:color] = '#FFFF00'
 
           Slack.speak(l(:label_redmine_slack_issue_updated,
                         project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
