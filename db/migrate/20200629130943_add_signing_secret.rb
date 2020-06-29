@@ -1,3 +1,4 @@
+# Add signing secret and remove verification token.
 class AddSigningSecret < ActiveRecord::Migration[5.2]
   def change
     add_column :redmine_slack_settings, :redmine_slack_signing_secret, :string
