@@ -4,7 +4,7 @@ class CreateRedmineSlackSettings < ActiveRecord::Migration[5.2]
     create_table :redmine_slack_settings do |t|
       t.references :project, null: false, index: true
       t.string :redmine_slack_token
-      t.string :redmine_slack_verification_token
+      t.string :redmine_slack_signing_secret
       t.string :redmine_slack_channel
       t.integer :redmine_slack_verify_ssl, default: 0, null: false
       t.integer :auto_mentions, default: 0, null: false
