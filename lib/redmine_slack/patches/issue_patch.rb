@@ -131,6 +131,10 @@ module RedmineSlack
 
           attachment[:color] = Slack.textfield_for_project(project, :color_update_notifications)
 
+          if closed?
+            attachment[:color] = Slack.textfield_for_project(project, :color_close_notifications)
+          end
+
           Slack.speak(l(:label_redmine_slack_issue_updated,
                         project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
                         url: send_redmine_slack_mention_url(project, current_journal.notes),

@@ -49,5 +49,6 @@
       p
         = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_create_notifications, size: 30 }
         = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_update_notifications, size: 30 }
+        = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_close_notifications, size: 30 }
 
     = submit_tag l(:button_save)

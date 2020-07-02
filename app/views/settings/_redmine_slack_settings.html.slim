@@ -68,3 +68,6 @@ p
 p
   = content_tag(:label, l(:label_settings_color_update_notifications))
   = text_field_tag('settings[color_update_notifications]', @settings[:color_update_notifications], size: 30)
+p
+  = content_tag(:label, l(:label_settings_color_close_notifications))
+  = text_field_tag('settings[color_close_notifications]', @settings[:color_close_notifications], size: 30)
