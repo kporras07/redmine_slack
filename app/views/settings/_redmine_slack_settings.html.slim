@@ -62,3 +62,9 @@ p
 p
   = content_tag(:label, l(:label_settings_post_wiki_updates))
   = check_box_tag 'settings[post_wiki_updates]', 1, @settings[:post_wiki_updates].to_i == 1
+p
+  = content_tag(:label, l(:label_color_create_notifications))
+  = text_field_tag('settings[color_create_notifications]', @settings[:color_create_notifications], size: 30)
+p
+  = content_tag(:label, l(:label_color_update_notifications))
+  = text_field_tag('settings[color_update_notifications]', @settings[:color_update_notifications], size: 30)

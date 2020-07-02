@@ -45,5 +45,11 @@
       br
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_wiki }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_wiki_updates }
+      br
+      p
+        = f.text_field :color_create_notifications, size: 60, label: l(:label_color_create_notifications)
+      br
+      p
+        = f.text_field :color_update_notifications, size: 60, label: l(:label_color_update_notifications)
 
     = submit_tag l(:button_save)
