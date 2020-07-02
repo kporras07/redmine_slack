@@ -6,7 +6,7 @@ class RedmineSlackSetting < ActiveRecord::Base
 
   validates :redmine_slack_token, url: {allow_blank: true, message: l(:error_redmine_slack_invalid_token)}
   validates(
-    :redmine_slack_verification_token,
+    :redmine_slack_signing_secret,
     url: {allow_blank: true, message: l(:error_redmine_slack_invalid_verification_token)}
   )
 

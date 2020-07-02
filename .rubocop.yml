@@ -42,6 +42,9 @@ Style/ClassVars:
 Bundler/OrderedGems:
   Enabled: false
 
+Rails/ReversibleMigration:
+  Enabled: false
+
 Layout/EmptyLineBetweenDefs:
   AllowAdjacentOneLineDefs: true
 

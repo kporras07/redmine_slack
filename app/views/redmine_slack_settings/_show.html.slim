@@ -17,7 +17,7 @@
           = l(:label_redmine_slack_default_not_visible)
           | )
       p
-        = f.text_field :redmine_slack_verification_token, size: 60, label: l(:label_settings_redmine_slack_verification_token)
+        = f.text_field :redmine_slack_signing_secret, size: 60, label: l(:label_settings_redmine_slack_signing_secret)
         em.info
           = l(:label_redmine_slack_project_text_field_info)
           |  (
