@@ -16,9 +16,9 @@ module RedmineSlack
       # Instance Methods.
       module InstanceMethods
         def handle_silent_update
-          RequestStore.store[:redmine_slack_silent] = params[:redmine_issue_slack_silent] || params[:redmine_journal_slack_silent]
+          RequestStore.store[:redmine_slack_silent] =
+            params[:redmine_issue_slack_silent] || params[:redmine_journal_slack_silent]
         end
-
       end
     end
   end

@@ -21,6 +21,12 @@ require:
 
 # Rules for Redmine
 
+Lint/SendWithMixinArgument:
+  Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
 Rails/ApplicationRecord:
   Enabled: false
 
