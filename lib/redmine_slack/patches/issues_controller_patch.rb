@@ -9,15 +9,14 @@ module RedmineSlack
       def self.included(base)
         base.send(:include, InstanceMethods)
         base.class_eval do
-          before_action :handle_silent_update, :only => :update
+          before_action :handle_silent_update, :only => [:create, :update]
         end
       end
 
       # Instance Methods.
       module InstanceMethods
-        extend ActiveSupport::PerThreadRegistry
         def handle_silent_update
-          RequestStore.store[:redmine_slack_silent] = params[:redmine_slack_silent]
+          RequestStore.store[:redmine_slack_silent] = params[:redmine_issue_slack_silent] || params[:redmine_journal_slack_silent]
         end
 
       end

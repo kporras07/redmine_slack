@@ -11,7 +11,7 @@ module RedmineSlack
 
                 context[:controller].send(
                 :render_to_string,
-                partial: 'redmine_slack/silent_updates', locals: {}
+                partial: 'redmine_slack/journal_silent_updates', locals: {}
                 )
             end
         end
