@@ -21,7 +21,7 @@ module RedmineSlack
 
           return if channels.blank?
           return if is_private? && !Slack.setting_for_project(project, :post_private_issues)
-          return unless RequestStore.store[:redmine_slack_silent].nil?
+          return if RequestStore.store[:redmine_slack_silent].nil?
 
           set_language_if_valid Setting.default_language
 
@@ -52,7 +52,7 @@ module RedmineSlack
 
         def send_redmine_slack_update
           return if current_journal.nil?
-          return unless RequestStore.store[:redmine_slack_silent].nil?
+          return if RequestStore.store[:redmine_slack_silent].nil?
 
           channels = Slack.channels_for_project project
 
