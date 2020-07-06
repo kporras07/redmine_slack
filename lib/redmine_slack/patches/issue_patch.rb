@@ -51,11 +51,7 @@ module RedmineSlack
 
         def send_redmine_slack_update
           return if current_journal.nil?
-
-          Rails.logger.warn("UPDATE ISSUE")
-          Rails.logger.warn(current_journal.issue)
-          Rails.logger.warn("UPDATE JOURNAL")
-          Rails.logger.warn(current_journal)
+          return if RequestStore.store[:redmine_slack_silent] != nil
 
           channels = Slack.channels_for_project project
 
