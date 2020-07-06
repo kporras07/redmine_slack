@@ -152,7 +152,7 @@ module RedmineSlack
     # Issues hook.
     class IssuesHook < Redmine::Hook::ViewListener
       # Add journal with edit issue
-      def view_issues_form_details_top(context = {})
+      def view_issues_form_details_bottom(context = {})
         return unless context[:issue].id.nil?
         context[:controller].send(
           :render_to_string,
