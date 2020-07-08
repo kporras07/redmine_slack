@@ -9,11 +9,11 @@ require 'redmine_slack'
 
 Redmine::Plugin.register :redmine_slack do
   name 'Redmine Slack plugin'
-  author 'Kevin Porras'
+  author 'Evolving Web'
   description 'Plugin to send notifications of Redmine updates to Slack channels.'
   version '0.0.1'
-  url 'http://example.com/path/to/plugin'
-  author_url 'http://example.com/about'
+  url 'https://github.com/evolvingweb/redmine_slack'
+  author_url 'https://evolvingweb.ca'
 
   requires_redmine version_or_higher: '4.0.0'
 

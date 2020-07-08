@@ -33,6 +33,8 @@ module RedmineSlack
             short: false
           }
 
+          attachment[:color] = Slack.textfield_for_project(project, :color_create_notifications)
+
           Slack.speak(l(:label_redmine_slack_wiki_created,
                         project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
                         url: "<#{Rails.application.routes.url_for(
@@ -95,6 +97,8 @@ module RedmineSlack
           end
 
           return unless send_message
+
+          attachment[:color] = Slack.textfield_for_project(project, :color_update_notifications)
 
           Slack.speak(l(:label_redmine_slack_wiki_updated,
                         project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",

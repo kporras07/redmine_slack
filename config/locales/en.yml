@@ -38,3 +38,6 @@ en:
   redmine_slack_verify_ssl_info_html: 'If your Redmine Slack service uses an invalid or self-signed SSL certificate, disable it.'
   redmine_slack_wiki_intro: Activate the changes for Wikis that should be sent to the pre-defined Redmine Slack channel.
   permission_manage_redmine_slack: Manage messenger
+  label_settings_color_create_notifications: Hex color for create notifications
+  label_settings_color_update_notifications: Hex color for update notifications
+  label_settings_color_close_notifications: Hex color for close notifications
