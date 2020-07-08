@@ -21,6 +21,7 @@ module RedmineSlack
 
           return if channels.blank?
           return if is_private? && !Slack.setting_for_project(project, :post_private_issues)
+          return if RequestStore.store[:redmine_slack_silent].nil?
 
           set_language_if_valid Setting.default_language
 
@@ -53,6 +54,7 @@ module RedmineSlack
 
         def send_redmine_slack_update
           return if current_journal.nil?
+          return if RequestStore.store[:redmine_slack_silent].nil?
 
           channels = Slack.channels_for_project project
 
@@ -152,6 +154,20 @@ module RedmineSlack
           end
           "<#{Slack.object_url(self)}|#{self}>#{mention_to}"
         end
+      end
+    end
+
+    # Issues hook.
+    class IssuesHook < Redmine::Hook::ViewListener
+      # Add journal with edit issue
+      def view_issues_form_details_bottom(context = {})
+        return unless context[:issue].id.nil?
+
+        context[:controller].send(
+          :render_to_string,
+          partial: 'redmine_slack/issues_silent_updates',
+          locals: {}
+        )
       end
     end
   end
