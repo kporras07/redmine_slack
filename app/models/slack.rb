@@ -21,7 +21,7 @@ class Slack
     {only_path: true, script_name: Redmine::Utils.relative_url_root}
   end
 
-  def self.speak(msg, channels, options)
+  def self.speak(msg, channels, options, notification=nil)
     url = 'https://slack.com/api/chat.postMessage'
     token = RedmineSlack.settings[:redmine_slack_token]
 
@@ -48,12 +48,58 @@ class Slack
         req.body = params.to_json
         Net::HTTP.start(uri.hostname, uri.port, http_options) do |http|
           response = http.request(req)
+          body = response.body
+          body_json = JSON.parse(body)
+          notification.slack_message_id = body_json["ts"]
+          notification.slack_channel_id = body_json["channel"]
+          notification.save
           Rails.logger.warn(response) unless [Net::HTTPSuccess, Net::HTTPRedirection, Net::HTTPOK].include? response
         end
       rescue StandardError => e
         Rails.logger.warn("cannot connect to #{url}")
         Rails.logger.warn(e)
       end
+    end
+  end
+
+  def self.update_message(msg, channel, options, notification=nil)
+    url = 'https://slack.com/api/chat.update'
+    token = RedmineSlack.settings[:redmine_slack_token]
+
+    return if url.blank?
+    return if channel.blank?
+    return if token.blank?
+
+    params = {
+      ts: notification.slack_message_id,
+      text: msg,
+      link_names: 1
+    }
+
+    params[:attachments] = [options[:attachment]] if options[:attachment]&.any?
+
+    uri = URI(url)
+    params[:channel] = channel
+    http_options = {use_ssl: uri.scheme == 'https'}
+    http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:redmine_slack_verify_ssl)
+    begin
+      req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json')
+      req['Authorization'] = "Bearer #{token}"
+      req.body = params.to_json
+      Net::HTTP.start(uri.hostname, uri.port, http_options) do |http|
+        Rails.logger.warn("req")
+        Rails.logger.warn(req)
+        response = http.request(req)
+        Rails.logger.warn("response")
+        Rails.logger.warn(response)
+        Rails.logger.warn(response.body)
+        notification.timestamp = Time.now.to_i
+        notification.save
+        Rails.logger.warn(response) unless [Net::HTTPSuccess, Net::HTTPRedirection, Net::HTTPOK].include? response
+      end
+    rescue StandardError => e
+      Rails.logger.warn("cannot connect to #{url}")
+      Rails.logger.warn(e)
     end
   end
 
