@@ -45,11 +45,14 @@ module RedmineSlack
 
           attachment[:color] = Slack.textfield_for_project(project, :color_create_notifications)
 
+          # TODO: 240 is grace time. Should be configurable.
+          notification = RedmineSlackNotification.find_or_create_within_timeframe("issue", id, 240)
+
           Slack.speak(l(:label_redmine_slack_issue_created,
                         project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
                         url: send_redmine_slack_mention_url(project, description),
                         user: author),
-                      channels, attachment: attachment, project: project)
+                      channels, { attachment: attachment, project: project }, notification)
         end
 
         def send_redmine_slack_update
@@ -142,12 +145,7 @@ module RedmineSlack
 
           # TODO: 240 is grace time. Should be configurable.
           notification = RedmineSlackNotification.find_or_create_within_timeframe(notification_type, id, 240)
-          # TODO: If issue-note, notification should be created ALWAYS.
-          Rails.logger.warn("DECIDE!?")
-          Rails.logger.warn(notification)
-          Rails.logger.warn(notification_type)
           if notification_type == "issue" && !notification.slack_message_id.nil?
-            Rails.logger.warn("UPDATE MESSAGE")          
             Slack.update_message(l(:label_redmine_slack_issue_updated,
               project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
               url: send_redmine_slack_mention_url(project, current_journal.notes),
