@@ -1,3 +1,4 @@
+# Create Redmine Slack notifications table.
 class CreateRedmineSlackNotifications < ActiveRecord::Migration[5.2]
   def change
     create_table :redmine_slack_notifications do |t|

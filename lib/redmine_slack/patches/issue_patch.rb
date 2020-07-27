@@ -45,13 +45,23 @@ module RedmineSlack
 
           attachment[:color] = Slack.textfield_for_project(project, :color_create_notifications)
 
-          notification = RedmineSlackNotification.find_or_create_within_timeframe("issue", id, Slack.textfield_for_project(project, :update_notification_threshold))
+          notification = RedmineSlackNotification.find_or_create_within_timeframe(
+            'issue',
+            id,
+            Slack.textfield_for_project(project, :update_notification_threshold)
+          )
 
-          Slack.speak(l(:label_redmine_slack_issue_created,
-                        project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
-                        url: send_redmine_slack_mention_url(project, description),
-                        user: author),
-                      channels, { attachment: attachment, project: project }, notification)
+          Slack.speak(
+            l(
+              :label_redmine_slack_issue_created,
+              project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
+              url: send_redmine_slack_mention_url(project, description),
+              user: author
+            ),
+            channels,
+            {attachment: attachment, project: project},
+            notification
+          )
         end
 
         def send_redmine_slack_update
@@ -69,11 +79,11 @@ module RedmineSlack
           attachment = {}
           text_diff = {}
 
-          notification_type = "issue"
+          notification_type = 'issue'
 
           if current_journal.notes.present? && Slack.setting_for_project(project, :updated_include_description)
             attachment[:text] = Slack.markup_format(Slack.trim(current_journal.notes, project))
-            notification_type = "issue-note"
+            notification_type = 'issue-note'
           end
 
           current_journal.details.each do |detail|
@@ -142,22 +152,36 @@ module RedmineSlack
             attachment[:color] = Slack.textfield_for_project(project, :color_close_notifications)
           end
 
-          notification = RedmineSlackNotification.find_or_create_within_timeframe(notification_type, id, Slack.textfield_for_project(project, :update_notification_threshold))
-          if notification_type == "issue" && !notification.slack_message_id.nil?
-            Slack.update_message(l(:label_redmine_slack_issue_updated,
-              project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
-              url: send_redmine_slack_mention_url(project, current_journal.notes),
-              user: current_journal.user),
-            notification.slack_channel_id, { attachment: attachment, project: project }, notification)
+          notification = RedmineSlackNotification.find_or_create_within_timeframe(
+            notification_type,
+            id,
+            Slack.textfield_for_project(project, :update_notification_threshold)
+          )
+          if notification_type == 'issue' && !notification.slack_message_id.nil?
+            Slack.update_message(
+              l(
+                :label_redmine_slack_issue_updated,
+                project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
+                url: send_redmine_slack_mention_url(project, current_journal.notes),
+                user: current_journal.user
+              ),
+              notification.slack_channel_id,
+              {attachment: attachment, project: project},
+              notification
+            )
           else
-            Slack.speak(l(:label_redmine_slack_issue_updated,
-              project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
-              url: send_redmine_slack_mention_url(project, current_journal.notes),
-              user: current_journal.user),
-            channels, { attachment: attachment, project: project }, notification)
+            Slack.speak(
+              l(
+                :label_redmine_slack_issue_updated,
+                project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
+                url: send_redmine_slack_mention_url(project, current_journal.notes),
+                user: current_journal.user
+              ),
+              channels,
+              {attachment: attachment, project: project},
+              notification
+            )
           end
-
-          
         end
 
         private

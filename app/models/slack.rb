@@ -21,7 +21,7 @@ class Slack
     {only_path: true, script_name: Redmine::Utils.relative_url_root}
   end
 
-  def self.speak(msg, channels, options, notification=nil)
+  def self.speak(msg, channels, options, notification = nil)
     url = 'https://slack.com/api/chat.postMessage'
     token = RedmineSlack.settings[:redmine_slack_token]
 
@@ -50,8 +50,8 @@ class Slack
           response = http.request(req)
           body = response.body
           body_json = JSON.parse(body)
-          notification.slack_message_id = body_json["ts"]
-          notification.slack_channel_id = body_json["channel"]
+          notification.slack_message_id = body_json['ts']
+          notification.slack_channel_id = body_json['channel']
           notification.save
           Rails.logger.warn(response) unless [Net::HTTPSuccess, Net::HTTPRedirection, Net::HTTPOK].include? response
         end
@@ -62,7 +62,7 @@ class Slack
     end
   end
 
-  def self.update_message(msg, channel, options, notification=nil)
+  def self.update_message(msg, channel, options, notification = nil)
     url = 'https://slack.com/api/chat.update'
     token = RedmineSlack.settings[:redmine_slack_token]
 
