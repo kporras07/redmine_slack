@@ -87,12 +87,7 @@ class Slack
       req['Authorization'] = "Bearer #{token}"
       req.body = params.to_json
       Net::HTTP.start(uri.hostname, uri.port, http_options) do |http|
-        Rails.logger.warn("req")
-        Rails.logger.warn(req)
         response = http.request(req)
-        Rails.logger.warn("response")
-        Rails.logger.warn(response)
-        Rails.logger.warn(response.body)
         notification.timestamp = Time.now.to_i
         notification.save
         Rails.logger.warn(response) unless [Net::HTTPSuccess, Net::HTTPRedirection, Net::HTTPOK].include? response
