@@ -128,7 +128,7 @@ module RedmineSlack
     end
 
     def tempfile(string)
-      t = Tempfile.new('diffy')
+      t = Tempfile.new('diffy', :encoding => 'ascii-8bit')
       # ensure tempfiles aren't unlinked when GC runs by maintaining a
       # reference to them.
       @tempfiles ||= []
