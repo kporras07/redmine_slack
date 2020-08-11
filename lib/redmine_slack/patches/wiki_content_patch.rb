@@ -35,17 +35,29 @@ module RedmineSlack
 
           attachment[:color] = Slack.textfield_for_project(project, :color_create_notifications)
 
-          Slack.speak(l(:label_redmine_slack_wiki_created,
-                        project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
-                        url: "<#{Rails.application.routes.url_for(
-                          :controller => 'wiki',
-                          :action => 'show',
-                          :project_id => project,
-                          :id => page.title,
-                          :host => Setting.host_name
-                        )}|#{page.title}>",
-                        user: User.current),
-                      channels, project: project, attachment: attachment)
+          notification = RedmineSlackNotification.find_or_create_within_timeframe(
+            'wiki-content',
+            id,
+            Slack.textfield_for_project(project, :update_notification_threshold)
+          )
+
+          Slack.speak(
+            l(
+              :label_redmine_slack_wiki_created,
+              project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
+              url: "<#{Rails.application.routes.url_for(
+                :controller => 'wiki',
+                :action => 'show',
+                :project_id => project,
+                :id => page.title,
+                :host => Setting.host_name
+              )}|#{page.title}>",
+              user: User.current
+            ),
+            channels,
+            {project: project, attachment: attachment},
+            notification
+          )
         end
 
         def send_redmine_slack_update
@@ -100,17 +112,48 @@ module RedmineSlack
 
           attachment[:color] = Slack.textfield_for_project(project, :color_update_notifications)
 
-          Slack.speak(l(:label_redmine_slack_wiki_updated,
-                        project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
-                        url: "<#{Rails.application.routes.url_for(
-                          :controller => 'wiki',
-                          :action => 'show',
-                          :project_id => project,
-                          :id => page.title,
-                          :host => Setting.host_name
-                        )}|#{page.title}>",
-                        user: User.current),
-                      channels, project: project, attachment: attachment)
+          notification = RedmineSlackNotification.find_or_create_within_timeframe(
+            'wiki-content',
+            id,
+            Slack.textfield_for_project(project, :update_notification_threshold)
+          )
+          if !notification.slack_message_id.nil?
+            Slack.update_message(
+              l(
+                :label_redmine_slack_wiki_updated,
+                project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
+                url: "<#{Rails.application.routes.url_for(
+                  :controller => 'wiki',
+                  :action => 'show',
+                  :project_id => project,
+                  :id => page.title,
+                  :host => Setting.host_name
+                )}|#{page.title}>",
+                user: User.current
+              ),
+              notification.slack_channel_id,
+              {project: project, attachment: attachment},
+              notification
+            )
+          else
+            Slack.speak(
+              l(
+                :label_redmine_slack_wiki_updated,
+                project_url: "<#{Slack.object_url project}|#{ERB::Util.html_escape(project)}>",
+                url: "<#{Rails.application.routes.url_for(
+                  :controller => 'wiki',
+                  :action => 'show',
+                  :project_id => project,
+                  :id => page.title,
+                  :host => Setting.host_name
+                )}|#{page.title}>",
+                user: User.current
+              ),
+              channels,
+              {project: project, attachment: attachment},
+              notification
+            )
+          end
         end
       end
     end

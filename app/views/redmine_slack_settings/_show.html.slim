@@ -26,6 +26,12 @@
       = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :redmine_slack_channel, size: 30 }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :redmine_slack_verify_ssl }
 
+      p
+        = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_create_notifications, size: 30 }
+        = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_update_notifications, size: 30 }
+        = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_close_notifications, size: 30 }
+        = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :update_notification_threshold, size: 30 }
+
       br
       h3 = l(:label_issue_plural)
       .info = t(:redmine_slack_issue_intro)
@@ -46,9 +52,5 @@
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_wiki }
       = render partial: 'redmine_slack_settings/redmine_slack_select', locals: { f: f, mf: :post_wiki_updates }
       br
-      p
-        = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_create_notifications, size: 30 }
-        = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_update_notifications, size: 30 }
-        = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_close_notifications, size: 30 }
 
     = submit_tag l(:button_save)
