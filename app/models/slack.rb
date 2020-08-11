@@ -296,4 +296,66 @@ class Slack
     # dashes, dots and underscores and must start with a letter or number.
     text.scan(/@[a-z0-9][a-z0-9_\-.]*/).uniq
   end
+
+  def self.get_recent_notifications
+    notifications = []
+    # @TODO: Change to 3600? Configurable?
+    notifications += RedmineSlackNotification.find_by_type_within_timeframe('issue', 3600)
+    notifications += RedmineSlackNotification.find_by_type_within_timeframe('issue-note', 3600)
+    notifications
+  end
+
+  def self.get_notification_replies(notification)
+    replies = []
+    url = 'https://slack.com/api/conversations.replies'
+    token = RedmineSlack.settings[:redmine_slack_token]
+
+    return if token.blank?
+
+    params = {
+      ts: notification.slack_message_id,
+      channel: notification.slack_channel_id
+    }
+
+    uri = URI(url)
+    uri.query = URI.encode_www_form(params)
+    begin
+      req = Net::HTTP::Get.new(uri, 'Content-Type' => 'application/json')
+      req['Authorization'] = "Bearer #{token}"
+      http_options = {use_ssl: uri.scheme == 'https'}
+      http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:redmine_slack_verify_ssl)
+      Net::HTTP.start(uri.hostname, uri.port, http_options) do |http|
+        response = http.request(req)
+        body = response.body
+        body_json = JSON.parse(body)
+        body_json['messages']
+      end
+    rescue StandardError => e
+      Rails.logger.warn("cannot connect to #{url}")
+      Rails.logger.warn(e)
+    end
+  end
+
+  def self.post_reply_to_redmine(message, issue_id)
+    journal = Journal.new
+    journal.journalized_type = 'Issue'
+    journal.journalized = Issue.find(issue_id)
+    journal.user_id = 2
+    journal.notes = message['text']
+    journal.save
+    journal
+  end
+
+  def self.post_slack_responses
+    notifications = self.get_recent_notifications
+    notifications.each do |notification|
+      issue_id = notification.entity_id
+      replies = self.get_notification_replies(notification)
+      replies.each do |reply|
+        if (reply['thread_ts'] != reply['ts'])
+          self.post_reply_to_redmine(reply, issue_id)
+        end
+      end
+    end
+  end
 end
