@@ -299,7 +299,7 @@ class Slack
 
   def self.get_recent_notifications
     notifications = []
-    # @TODO: Change to 3600? Configurable?
+    # @TODO: Configurable? Decide time behavior: get notifications from 24h and messages from last hour?
     notifications += RedmineSlackNotification.find_by_type_within_timeframe('issue', 3600)
     notifications += RedmineSlackNotification.find_by_type_within_timeframe('issue-note', 3600)
     notifications
@@ -337,14 +337,60 @@ class Slack
   end
 
   def self.post_reply_to_redmine(message, issue_id)
+    # @TODO: Map author.
+    author_id = 2
     journal = Journal.new
     journal.journalized_type = 'Issue'
     journal.journalized = Issue.find(issue_id)
-    journal.user_id = 2
+    journal.user_id = author_id
     journal.notes = message['text']
+
+    if (message.key?('files'))
+      message['files'].each do |file|
+        url = file['url_private']
+        file_content = self.get_attachment(url)
+        attachments = []
+        author = User.find(author_id)
+        if (file_content)
+          attachment = Attachment.new(:file => file_content)
+          attachment.container_id = issue_id
+          attachment.container_type = 'Issue'
+          attachment.author = author
+          attachment.filename = file['title']
+          attachment.content_type = file['mimetype']
+          attachment.save
+          journal.journalize_attachment(attachment, :added)
+          attachments << attachment
+        end
+      end
+    end
+
     journal.save
+    journal.journalized.save
     journal
   end
+
+  def self.get_attachment(url)
+    token = RedmineSlack.settings[:redmine_slack_token]
+
+    return if token.blank?
+
+    uri = URI(url)
+    begin
+      req = Net::HTTP::Get.new(uri)
+      req['Authorization'] = "Bearer #{token}"
+      http_options = {use_ssl: uri.scheme == 'https'}
+      http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:redmine_slack_verify_ssl)
+      Net::HTTP.start(uri.hostname, uri.port, http_options) do |http|
+        response = http.request(req)
+        response.body
+      end
+    rescue StandardError => e
+      Rails.logger.warn("cannot connect to #{url}")
+      Rails.logger.warn(e)
+    end
+  end
+
 
   def self.post_slack_responses
     notifications = self.get_recent_notifications
