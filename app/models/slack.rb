@@ -336,9 +336,47 @@ class Slack
     end
   end
 
-  def self.post_reply_to_redmine(message, issue_id)
-    # @TODO: Map author.
+  def self.get_user_email(slack_user_id)
+    replies = []
+    url = 'https://slack.com/api/users.info'
+    token = RedmineSlack.settings[:redmine_slack_token]
+
+    return if token.blank?
+
+    params = {
+      user: slack_user_id
+    }
+
+    uri = URI(url)
+    uri.query = URI.encode_www_form(params)
+    begin
+      req = Net::HTTP::Get.new(uri, 'Content-Type' => 'application/json')
+      req['Authorization'] = "Bearer #{token}"
+      http_options = {use_ssl: uri.scheme == 'https'}
+      http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:redmine_slack_verify_ssl)
+      Net::HTTP.start(uri.hostname, uri.port, http_options) do |http|
+        response = http.request(req)
+        body = response.body
+        body_json = JSON.parse(body)
+        body_json['user']['profile']['email']
+      end
+    rescue StandardError => e
+      Rails.logger.warn("cannot connect to #{url}")
+      Rails.logger.warn(e)
+    end
+  end
+
+  def self.get_user_id(email)
     author_id = 2
+    email_address = EmailAddress.find_by address: email
+    return 2 if email_address.nil?
+    author_id = email_address.user_id
+    author_id
+  end
+
+  def self.post_reply_to_redmine(message, issue_id)
+    email = self.get_user_email(message['user'])
+    author_id = self.get_user_id(email)
     journal = Journal.new
     journal.journalized_type = 'Issue'
     journal.journalized = Issue.find(issue_id)
