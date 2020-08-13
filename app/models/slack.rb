@@ -299,9 +299,9 @@ class Slack
 
   def self.get_recent_notifications
     notifications = []
-    # @TODO: Configurable? Decide time behavior: get notifications from 24h and messages from last hour?
-    notifications += RedmineSlackNotification.find_by_type_within_timeframe('issue', 3600)
-    notifications += RedmineSlackNotification.find_by_type_within_timeframe('issue-note', 3600)
+    # Get notifications sent in last 24 hours.
+    notifications += RedmineSlackNotification.find_by_type_within_timeframe('issue', 86400)
+    notifications += RedmineSlackNotification.find_by_type_within_timeframe('issue-note', 86400)
     notifications
   end
 
@@ -358,6 +358,7 @@ class Slack
         response = http.request(req)
         body = response.body
         body_json = JSON.parse(body)
+        # @TODO: Exists?
         body_json['user']['profile']['email']
       end
     rescue StandardError => e
@@ -367,11 +368,9 @@ class Slack
   end
 
   def self.get_user_id(email)
-    author_id = 2
     email_address = EmailAddress.find_by address: email
     return 2 if email_address.nil?
-    author_id = email_address.user_id
-    author_id
+    email_address.user_id
   end
 
   def self.post_reply_to_redmine(message, issue_id)
@@ -431,13 +430,20 @@ class Slack
 
 
   def self.post_slack_responses
+    # TODO: Make seconds configurable.
+    seconds = 3600
     notifications = self.get_recent_notifications
     notifications.each do |notification|
       issue_id = notification.entity_id
       replies = self.get_notification_replies(notification)
       replies.each do |reply|
         if (reply['thread_ts'] != reply['ts'])
-          self.post_reply_to_redmine(reply, issue_id)
+          current_timestamp = Time.now.to_i
+          timestamp = current_timestamp - seconds
+          # Only act for replies within allowed "seconds".
+          if (reply['ts'].to_i > timestamp)
+            self.post_reply_to_redmine(reply, issue_id)
+          end
         end
       end
     end
