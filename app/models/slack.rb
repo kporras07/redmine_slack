@@ -438,7 +438,7 @@ class Slack
       issue_id = notification.entity_id
       replies = get_notification_replies(notification)
       replies.each do |reply|
-        next if reply['thread_ts'] != reply['ts']
+        next if reply['thread_ts'] == reply['ts']
 
         current_timestamp = Time.now.to_i
         timestamp = current_timestamp - seconds
