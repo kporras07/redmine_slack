@@ -358,8 +358,9 @@ class Slack
         response = http.request(req)
         body = response.body
         body_json = JSON.parse(body)
-        # @TODO: Exists?
-        body_json['user']['profile']['email']
+        if (body_json['user']['profile'].key?('email'))
+          body_json['user']['profile']['email']
+        end
       end
     rescue StandardError => e
       Rails.logger.warn("cannot connect to #{url}")
@@ -368,6 +369,7 @@ class Slack
   end
 
   def self.get_user_id(email)
+    return 2 if email.nil?
     email_address = EmailAddress.find_by address: email
     return 2 if email_address.nil?
     email_address.user_id
