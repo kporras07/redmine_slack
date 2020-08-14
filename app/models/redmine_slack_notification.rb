@@ -32,7 +32,7 @@ class RedmineSlackNotification < ActiveRecord::Base
     notification
   end
 
-  def self.find_by_type_within_timeframe(entity, seconds)
+  def self.find_notification_by_type_within_timeframe(entity, seconds)
     current_timestamp = Time.now.to_i
     timestamp = current_timestamp - seconds.to_i
     notifications = RedmineSlackNotification.where(

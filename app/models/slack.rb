@@ -300,13 +300,12 @@ class Slack
   def self.get_recent_notifications
     notifications = []
     # Get notifications sent in last 24 hours.
-    notifications += RedmineSlackNotification.find_by_type_within_timeframe('issue', 86400)
-    notifications += RedmineSlackNotification.find_by_type_within_timeframe('issue-note', 86400)
+    notifications += RedmineSlackNotification.find_notification_by_type_within_timeframe('issue', 86_400)
+    notifications += RedmineSlackNotification.find_notification_by_type_within_timeframe('issue-note', 86_400)
     notifications
   end
 
   def self.get_notification_replies(notification)
-    replies = []
     url = 'https://slack.com/api/conversations.replies'
     token = RedmineSlack.settings[:redmine_slack_token]
 
@@ -337,7 +336,6 @@ class Slack
   end
 
   def self.get_user_email(slack_user_id)
-    replies = []
     url = 'https://slack.com/api/users.info'
     token = RedmineSlack.settings[:redmine_slack_token]
 
@@ -358,7 +356,7 @@ class Slack
         response = http.request(req)
         body = response.body
         body_json = JSON.parse(body)
-        if (body_json['user']['profile'].key?('email'))
+        if body_json['user']['profile'].key?('email')
           body_json['user']['profile']['email']
         end
       end
@@ -370,37 +368,39 @@ class Slack
 
   def self.get_user_id(email)
     return 2 if email.nil?
+
     email_address = EmailAddress.find_by address: email
     return 2 if email_address.nil?
+
     email_address.user_id
   end
 
   def self.post_reply_to_redmine(message, issue_id)
-    email = self.get_user_email(message['user'])
-    author_id = self.get_user_id(email)
+    email = get_user_email(message['user'])
+    author_id = get_user_id(email)
     journal = Journal.new
     journal.journalized_type = 'Issue'
     journal.journalized = Issue.find(issue_id)
     journal.user_id = author_id
     journal.notes = message['text']
 
-    if (message.key?('files'))
+    if message.key? 'files'
       message['files'].each do |file|
         url = file['url_private']
-        file_content = self.get_attachment(url)
+        file_content = get_attachment(url)
         attachments = []
         author = User.find(author_id)
-        if (file_content)
-          attachment = Attachment.new(:file => file_content)
-          attachment.container_id = issue_id
-          attachment.container_type = 'Issue'
-          attachment.author = author
-          attachment.filename = file['title']
-          attachment.content_type = file['mimetype']
-          attachment.save
-          journal.journalize_attachment(attachment, :added)
-          attachments << attachment
-        end
+        next if file_content.nil?
+
+        attachment = Attachment.new(:file => file_content)
+        attachment.container_id = issue_id
+        attachment.container_type = 'Issue'
+        attachment.author = author
+        attachment.filename = file['title']
+        attachment.content_type = file['mimetype']
+        attachment.save
+        journal.journalize_attachment(attachment, :added)
+        attachments << attachment
       end
     end
 
@@ -430,23 +430,22 @@ class Slack
     end
   end
 
-
   def self.post_slack_responses
     # TODO: Make seconds configurable.
     seconds = 3600
-    notifications = self.get_recent_notifications
+    notifications = get_recent_notifications
     notifications.each do |notification|
       issue_id = notification.entity_id
-      replies = self.get_notification_replies(notification)
+      replies = get_notification_replies(notification)
       replies.each do |reply|
-        if (reply['thread_ts'] != reply['ts'])
-          current_timestamp = Time.now.to_i
-          timestamp = current_timestamp - seconds
-          # Only act for replies within allowed "seconds".
-          if (reply['ts'].to_i > timestamp)
-            self.post_reply_to_redmine(reply, issue_id)
-          end
-        end
+        next if reply['thread_ts'] != reply['ts']
+
+        current_timestamp = Time.now.to_i
+        timestamp = current_timestamp - seconds
+        # Only act for replies within allowed "seconds".
+        next if reply['ts'].to_i < timestamp
+
+        post_reply_to_redmine(reply, issue_id)
       end
     end
   end
