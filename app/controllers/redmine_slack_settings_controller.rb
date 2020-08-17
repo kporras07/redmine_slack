@@ -39,6 +39,7 @@ class RedmineSlackSettingsController < ApplicationController
                                     :post_wiki_updates,
                                     :color_create_notifications,
                                     :color_update_notifications,
-                                    :update_notification_threshold
+                                    :update_notification_threshold,
+                                    :replies_threshold
   end
 end

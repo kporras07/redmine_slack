@@ -431,11 +431,12 @@ class Slack
   end
 
   def self.post_slack_responses
-    # TODO: Make seconds configurable.
-    seconds = 3600
     notifications = get_recent_notifications
     notifications.each do |notification|
       issue_id = notification.entity_id
+      issue = Issue.find(issue_id)
+      project = Project.find(issue.project_id)
+      seconds = Slack.textfield_for_project(project, :replies_threshold).to_i || 0
       replies = get_notification_replies(notification)
       replies.each do |reply|
         next if reply['thread_ts'] == reply['ts']

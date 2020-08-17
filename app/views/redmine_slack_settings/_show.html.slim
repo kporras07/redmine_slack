@@ -31,6 +31,7 @@
         = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_update_notifications, size: 30 }
         = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :color_close_notifications, size: 30 }
         = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :update_notification_threshold, size: 30 }
+        = render partial: 'redmine_slack_settings/redmine_slack_text', locals: { f: f, mf: :replies_threshold, size: 30 }
 
       br
       h3 = l(:label_issue_plural)
