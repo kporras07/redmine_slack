@@ -439,7 +439,7 @@ class Slack
       seconds = Slack.textfield_for_project(project, :replies_threshold).to_i || 0
       replies = get_notification_replies(notification)
       replies.each do |reply|
-        next if reply['thread_ts'] == reply['ts']
+        next if !reply.key? 'thread_ts' || reply['thread_ts'] == reply['ts']
 
         current_timestamp = Time.now.to_i
         timestamp = current_timestamp - seconds
