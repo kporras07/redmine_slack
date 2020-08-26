@@ -296,4 +296,158 @@ class Slack
     # dashes, dots and underscores and must start with a letter or number.
     text.scan(/@[a-z0-9][a-z0-9_\-.]*/).uniq
   end
+
+  def self.get_recent_notifications
+    notifications = []
+    # Get notifications sent in last 24 hours.
+    notifications += RedmineSlackNotification.find_notification_by_type_within_timeframe('issue', 86_400)
+    notifications += RedmineSlackNotification.find_notification_by_type_within_timeframe('issue-note', 86_400)
+    notifications
+  end
+
+  def self.get_notification_replies(notification)
+    url = 'https://slack.com/api/conversations.replies'
+    token = RedmineSlack.settings[:redmine_slack_token]
+
+    return if token.blank?
+
+    params = {
+      ts: notification.slack_message_id,
+      channel: notification.slack_channel_id
+    }
+
+    uri = URI(url)
+    uri.query = URI.encode_www_form(params)
+    begin
+      req = Net::HTTP::Get.new(uri, 'Content-Type' => 'application/json')
+      req['Authorization'] = "Bearer #{token}"
+      http_options = {use_ssl: uri.scheme == 'https'}
+      http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:redmine_slack_verify_ssl)
+      Net::HTTP.start(uri.hostname, uri.port, http_options) do |http|
+        response = http.request(req)
+        body = response.body
+        body_json = JSON.parse(body)
+        body_json['messages']
+      end
+    rescue StandardError => e
+      Rails.logger.warn("cannot connect to #{url}")
+      Rails.logger.warn(e)
+    end
+  end
+
+  def self.get_user_email(slack_user_id)
+    url = 'https://slack.com/api/users.info'
+    token = RedmineSlack.settings[:redmine_slack_token]
+
+    return if token.blank?
+
+    params = {
+      user: slack_user_id
+    }
+
+    uri = URI(url)
+    uri.query = URI.encode_www_form(params)
+    begin
+      req = Net::HTTP::Get.new(uri, 'Content-Type' => 'application/json')
+      req['Authorization'] = "Bearer #{token}"
+      http_options = {use_ssl: uri.scheme == 'https'}
+      http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:redmine_slack_verify_ssl)
+      Net::HTTP.start(uri.hostname, uri.port, http_options) do |http|
+        response = http.request(req)
+        body = response.body
+        body_json = JSON.parse(body)
+        if body_json['user']['profile'].key?('email')
+          body_json['user']['profile']['email']
+        end
+      end
+    rescue StandardError => e
+      Rails.logger.warn("cannot connect to #{url}")
+      Rails.logger.warn(e)
+    end
+  end
+
+  def self.get_user_id(email)
+    return 2 if email.nil?
+
+    email_address = EmailAddress.find_by address: email
+    return 2 if email_address.nil?
+
+    email_address.user_id
+  end
+
+  def self.post_reply_to_redmine(message, issue_id)
+    email = get_user_email(message['user'])
+    author_id = get_user_id(email)
+    journal = Journal.new
+    journal.journalized_type = 'Issue'
+    journal.journalized = Issue.find(issue_id)
+    journal.user_id = author_id
+    journal.notes = message['text']
+
+    if message.key? 'files'
+      message['files'].each do |file|
+        url = file['url_private']
+        file_content = get_attachment(url)
+        attachments = []
+        author = User.find(author_id)
+        next if file_content.nil?
+
+        attachment = Attachment.new(:file => file_content)
+        attachment.container_id = issue_id
+        attachment.container_type = 'Issue'
+        attachment.author = author
+        attachment.filename = file['title']
+        attachment.content_type = file['mimetype']
+        attachment.save
+        journal.journalize_attachment(attachment, :added)
+        attachments << attachment
+      end
+    end
+
+    journal.save
+    journal.journalized.save
+    journal
+  end
+
+  def self.get_attachment(url)
+    token = RedmineSlack.settings[:redmine_slack_token]
+
+    return if token.blank?
+
+    uri = URI(url)
+    begin
+      req = Net::HTTP::Get.new(uri)
+      req['Authorization'] = "Bearer #{token}"
+      http_options = {use_ssl: uri.scheme == 'https'}
+      http_options[:verify_mode] = OpenSSL::SSL::VERIFY_NONE unless RedmineSlack.setting?(:redmine_slack_verify_ssl)
+      Net::HTTP.start(uri.hostname, uri.port, http_options) do |http|
+        response = http.request(req)
+        response.body
+      end
+    rescue StandardError => e
+      Rails.logger.warn("cannot connect to #{url}")
+      Rails.logger.warn(e)
+    end
+  end
+
+  def self.post_slack_responses
+    notifications = get_recent_notifications
+    notifications.each do |notification|
+      issue_id = notification.entity_id
+      issue = Issue.find(issue_id)
+      project = Project.find(issue.project_id)
+      seconds = Slack.textfield_for_project(project, :replies_threshold).to_i || 0
+      replies = get_notification_replies(notification)
+      replies.each do |reply|
+        next unless reply.key?('thread_ts') && reply['thread_ts'] != reply['ts']
+
+        current_timestamp = Time.now.to_i
+        timestamp = current_timestamp - seconds
+        # Only act for replies within allowed "seconds".
+        next if reply['ts'].to_i < timestamp
+
+        post_reply_to_redmine(reply, issue_id)
+      end
+    end
+  end
 end

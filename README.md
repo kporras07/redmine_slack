@@ -58,6 +58,15 @@ This is an example on how to configure the Slash Command:
 
 ![Screenshot of Slack Slash Command Configuration in Slack App config](./docs/images/slash-command.png)
 
+## Posting Slack replies to Redmine
+
+This plugin is able to post the threaded replies for a notification back to Redmine. In order to do so, you need to configure a cron job like this:
+
+```
+0 * * * * cd /home/redmine/redmine && ./bin/rails runner Slack.post_slack_responses -e production >> log/cron_rake.log 2>&1
+```
+
+You should also configure "Get Slack replies threshold" parameter in the global plugin settings to the same amount of seconds between each cron run (e.g. if cron runs once per hour, time replies threshold should be 3600).
 
 # Features
 
@@ -70,3 +79,6 @@ The following scopes are required in order to work properly with Slack:
 - chat:write
 - chat:write.public
 - commands
+- files:read
+- user:read
+- user:read.email

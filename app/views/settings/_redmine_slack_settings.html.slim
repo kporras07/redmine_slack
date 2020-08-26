@@ -30,6 +30,9 @@ p
 p
   = content_tag(:label, l(:label_settings_update_notification_threshold))
   = text_field_tag('settings[update_notification_threshold]', @settings[:update_notification_threshold], size: 30)
+p
+  = content_tag(:label, l(:label_settings_replies_threshold))
+  = text_field_tag('settings[replies_threshold]', @settings[:replies_threshold], size: 30)
 
 br
 h3 = l(:label_issue_plural)

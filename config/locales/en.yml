@@ -42,3 +42,4 @@ en:
   label_settings_color_update_notifications: Hex color for update notifications
   label_settings_color_close_notifications: Hex color for close notifications
   label_settings_update_notification_threshold: Update notifications threshold
+  label_settings_replies_threshold: Get Slack replies threshold
