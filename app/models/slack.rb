@@ -445,6 +445,7 @@ class Slack
         timestamp = current_timestamp - seconds
         # Only act for replies within allowed "seconds".
         next if reply['ts'].to_i < timestamp
+
         post_reply_to_redmine(reply, issue_id)
       end
     end
