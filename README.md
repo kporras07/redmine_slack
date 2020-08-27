@@ -68,6 +68,8 @@ This plugin is able to post the threaded replies for a notification back to Redm
 
 You should also configure "Get Slack replies threshold" parameter in the global plugin settings to the same amount of seconds between each cron run (e.g. if cron runs once per hour, time replies threshold should be 3600).
 
+In order to make this work, the bot needs to be added to the channels so that it can read the messages.
+
 # Features
 
 This plugin sends Slack notifications when you update issues or wiki entries.
@@ -79,6 +81,8 @@ The following scopes are required in order to work properly with Slack:
 - chat:write
 - chat:write.public
 - commands
+- channels:history
+- channels:read
 - files:read
 - user:read
 - user:read.email

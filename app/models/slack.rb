@@ -327,7 +327,7 @@ class Slack
         response = http.request(req)
         body = response.body
         body_json = JSON.parse(body)
-        body_json['messages']
+        body_json['messages'] || []
       end
     rescue StandardError => e
       Rails.logger.warn("cannot connect to #{url}")
@@ -445,7 +445,6 @@ class Slack
         timestamp = current_timestamp - seconds
         # Only act for replies within allowed "seconds".
         next if reply['ts'].to_i < timestamp
-
         post_reply_to_redmine(reply, issue_id)
       end
     end
