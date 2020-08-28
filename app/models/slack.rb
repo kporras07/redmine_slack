@@ -327,7 +327,7 @@ class Slack
         response = http.request(req)
         body = response.body
         body_json = JSON.parse(body)
-        body_json['messages']
+        body_json['messages'] || []
       end
     rescue StandardError => e
       Rails.logger.warn("cannot connect to #{url}")
