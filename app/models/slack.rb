@@ -11,9 +11,20 @@ class Slack
     text
   end
 
-  def self.trim(msg, project)
+  def self.trim(original_msg, project)
+    msg = original_msg
     trim_size = Slack.textfield_for_project(project, :text_trim_size).to_i
-    msg = msg[0..trim_size] if trim_size.positive?
+
+    if trim_size.positive?
+      loop do
+        msg = msg[0..trim_size]
+        break unless /^.* (http[A-Za-z\.\d\/\:]*)$/.match(msg)
+        break if msg == original_msg
+        # Restore original message and try again.
+        msg = original_msg
+        trim_size += 1
+      end
+    end
     msg
   end
 
